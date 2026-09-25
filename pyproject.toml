@@ -8,6 +8,7 @@ dependencies = [
     "datasets>=5.0.1",
     "numpy>=2.5.3",
     "pyarrow>=25.0.1",
+    "sentencepiece>=0.2.2",
     "tiktoken>=0.14.0",
     "torch>=2.14.0",
     "tqdm>=4.70.1",
