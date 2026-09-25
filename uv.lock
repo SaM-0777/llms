@@ -666,6 +666,33 @@ wheels = [
 ]
 
 [[package]]
+name = "llms"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "datasets" },
+    { name = "numpy" },
+    { name = "pyarrow" },
+    { name = "tiktoken" },
+    { name = "torch" },
+    { name = "tqdm" },
+    { name = "transformers" },
+    { name = "wandb" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "datasets", specifier = ">=5.0.1" },
+    { name = "numpy", specifier = ">=2.5.3" },
+    { name = "pyarrow", specifier = ">=25.0.1" },
+    { name = "tiktoken", specifier = ">=0.14.0" },
+    { name = "torch", specifier = ">=2.14.0" },
+    { name = "tqdm", specifier = ">=4.70.1" },
+    { name = "transformers", specifier = ">=5.17.0" },
+    { name = "wandb", specifier = ">=0.30.0" },
+]
+
+[[package]]
 name = "markdown-it-py"
 version = "4.2.0"
 source = { registry = "https://pypi.org/simple" }
@@ -911,31 +938,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/7f/74/d2c27e03cb84251dfe7249b8e82923643c6d48fa4883b9476b025e7dc7eb/multiprocess-0.70.19-py313-none-any.whl", hash = "sha256:8d5eb4ec5017ba2fab4e34a747c6d2c2b6fecfe9e7236e77988db91580ada952", size = 156414, upload-time = "2026-01-19T06:47:35.915Z" },
     { url = "https://files.pythonhosted.org/packages/a0/61/af9115673a5870fd885247e2f1b68c4f1197737da315b520a91c757a861a/multiprocess-0.70.19-py314-none-any.whl", hash = "sha256:e8cc7fbdff15c0613f0a1f1f8744bef961b0a164c0ca29bdff53e9d2d93c5e5f", size = 160318, upload-time = "2026-01-19T06:47:37.497Z" },
     { url = "https://files.pythonhosted.org/packages/7e/82/69e539c4c2027f1e1697e09aaa2449243085a0edf81ae2c6341e84d769b6/multiprocess-0.70.19-py39-none-any.whl", hash = "sha256:0d4b4397ed669d371c81dcd1ef33fd384a44d6c3de1bd0ca7ac06d837720d3c5", size = 133477, upload-time = "2026-01-19T06:47:38.619Z" },
-]
-
-[[package]]
-name = "nanogpt"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "datasets" },
-    { name = "numpy" },
-    { name = "tiktoken" },
-    { name = "torch" },
-    { name = "tqdm" },
-    { name = "transformers" },
-    { name = "wandb" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "datasets", specifier = ">=5.0.1" },
-    { name = "numpy", specifier = ">=2.5.3" },
-    { name = "tiktoken", specifier = ">=0.14.0" },
-    { name = "torch", specifier = ">=2.14.0" },
-    { name = "tqdm", specifier = ">=4.70.1" },
-    { name = "transformers", specifier = ">=5.17.0" },
-    { name = "wandb", specifier = ">=0.30.0" },
 ]
 
 [[package]]
