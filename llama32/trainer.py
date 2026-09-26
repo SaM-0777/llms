@@ -151,7 +151,7 @@ class Trainer:
                 self.last_log_time = now
                 self.last_tokens_seen = self.tokens_seen
 
-            if (iter_num + 1) % self.args.eval_interval == 0 and iter_num != 0:
+            if (iter_num + 1) % self.args.eval_intervals == 0 and iter_num != 0:
                 metrics = self.evaluate_model()
 
                 print(
