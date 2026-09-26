@@ -72,6 +72,7 @@ class Attention(nn.Module):
         freq_cis: torch.Tensor,
         start_pos: int,
         mask: torch.Tensor | None,
+        use_kv_cache: bool = False,
     ) -> torch.Tensor:
         B, seqlen, _ = x.shape
         q, k, v = self.W_q(x), self.W_k(x), self.W_v(x)
@@ -82,17 +83,20 @@ class Attention(nn.Module):
 
         q, k = apply_rotary_emb(q, k, freq_cis)
 
-        self.cache_k[:B, start_pos : start_pos + seqlen] = k  # type: ignore
-        self.cache_v[:B, start_pos : start_pos + seqlen] = v  # type: ignore
+        if use_kv_cache:
+            self.cache_k[:B, start_pos : start_pos + seqlen] = k  # type: ignore
+            self.cache_v[:B, start_pos : start_pos + seqlen] = v  # type: ignore
 
-        keys = self.cache_k[:B, : start_pos + seqlen]  # type: ignore
-        values = self.cache_v[:B, : start_pos + seqlen]  # type: ignore
+            keys = self.cache_k[:B, : start_pos + seqlen]  # type: ignore
+            values = self.cache_v[:B, : start_pos + seqlen]  # type: ignore
+        else:
+            keys = k
+            values = v
 
         keys = keys.repeat_interleave(self.n_rep, dim=2)
         values = values.repeat_interleave(self.n_rep, dim=2)
 
         q = q.transpose(1, 2)
-        
         keys = keys.transpose(1, 2)
         values = values.transpose(1, 2)
 

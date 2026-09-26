@@ -27,8 +27,9 @@ class Block(nn.Module):
         freq_cis: torch.Tensor,
         start_pos: int,
         mask: torch.Tensor | None,
+        use_kv_cache: bool = False,
     ):
-        h = x + self.attention(self.attention_norm(x), freq_cis, start_pos, mask)
+        h = x + self.attention(self.attention_norm(x), freq_cis, start_pos, mask, use_kv_cache)
         out = h + self.feed_forward(self.ffn_norm(h))
         return out
 
@@ -61,6 +62,7 @@ class LLama3_xs(nn.Module):
         x: torch.Tensor,
         targets: torch.Tensor | None = None,
         start_pos: int = 0,
+        use_kv_cache: bool = False,
     ) -> tuple[torch.Tensor, torch.Tensor | None]:
         B, seqlen = x.shape
         h = self.embedding(x)
@@ -76,7 +78,7 @@ class LLama3_xs(nn.Module):
             ).to(h.dtype)
 
         for block in self.blocks:
-            h = block(h, freq_cis, start_pos, mask)
+            h = block(h, freq_cis, start_pos, mask, use_kv_cache)
 
         h = self.norm(h)
         logits = self.out_head(h).float()
