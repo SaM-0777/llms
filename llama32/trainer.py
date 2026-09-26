@@ -136,7 +136,15 @@ class Trainer:
                 checkpoint_path = os.path.join(
                     self.models_dir, f"model_{self.timestamp}@{millions}M.pt"
                 )
-                torch.save(self.model.state_dict(), checkpoint_path)
+                checkpoint = {
+                    "model": self.model.state_dict(),
+                    "optimizer": self.optimizer.state_dict(),
+                    "scheduler": self.scheduler.state_dict(),
+                    "scaler": self.scaler.state_dict(),
+                    "iter_num": iter_num,
+                    "best_val_loss": best_val_loss,
+                }
+                torch.save(checkpoint, checkpoint_path)
                 print(f"\nSaved periodic checkpoint to {checkpoint_path}")
 
         self.writer.close()

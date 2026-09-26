@@ -1,3 +1,4 @@
+from dataclasses import asdict
 import os
 from datetime import datetime
 from itertools import cycle
@@ -6,22 +7,43 @@ import torch
 from torch.optim.lr_scheduler import LinearLR, SequentialLR, CosineAnnealingLR
 from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader
+from transformers import AutoTokenizer
+import wandb
 
 from .config import ModelConfig
 from .dataset import MemmapDataset
 from .model import LLama3_xs
 from .trainer import Trainer
-from .train_utils import load_checkpoint, get_device_settings
+from .train_utils import get_model_stats, load_checkpoint, get_device_settings
+
+
+def load_tokenizer(tokenizer_name: str):
+    tokenizer = AutoTokenizer.from_pretrained(
+        tokenizer_name,
+        use_fast=True,
+    )
+    return tokenizer
 
 
 def main(cfg: ModelConfig):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-    writer = SummaryWriter(log_dir=f"runs/llama3_xs_{timestamp}")
+    writer = SummaryWriter(log_dir=f"runs/llama32_{timestamp}")
     torch.manual_seed(cfg.seed)
     device, dtype, ptdtype, ctx, scaler = get_device_settings()
 
+    if cfg.wandb_log:
+        wandb.init(
+            project=cfg.project_name,
+            name=f"llama3_xs_{timestamp}",
+            config=asdict(cfg),
+        )
+
     cfg.device = torch.device(device)
     cfg.dtype = ptdtype
+
+    tokenizer = load_tokenizer(cfg.tokenizer_name)
+    vocab_size = tokenizer.vocab_size
+    cfg.vocab_size = vocab_size
 
     model = LLama3_xs(cfg)
 
@@ -31,23 +53,27 @@ def main(cfg: ModelConfig):
 
     model.to(device)
 
+    stats = get_model_stats(model, cfg)
+    wandb.config.update(stats)
+    wandb.log(stats, step=0)
+
     # compile the model
     print(f"Compiling the model...")
     model = torch.compile(model)
 
     # Optimizer
     optimizer = torch.optim.AdamW(
-        model.parameters(),
+        model.parameters(),  # type: ignore
         lr=cfg.learning_rate,
         betas=(0.9, 0.95),
-        weight_decay=0.1,
+        weight_decay=cfg.weight_decay,
         eps=1e-9,
         fused=(True if device == "cuda" else False),
     )
 
     # Scheduler
-    num_optimizer_steps = cfg.max_iters // cfg.gradient_accumulation_step
-    warmup_optimizer_steps = cfg.warmup_steps // cfg.gradient_accumulation_step
+    num_optimizer_steps = cfg.max_iters // cfg.gradient_accumulation_steps
+    warmup_optimizer_steps = cfg.warmup_steps // cfg.gradient_accumulation_steps
 
     scheduler_warmup = LinearLR(optimizer, total_iters=cfg.warmup_steps)
     scheduler_delay = CosineAnnealingLR(
@@ -110,6 +136,14 @@ def main(cfg: ModelConfig):
         timestamp=timestamp,
         max_norm=1.0,
     )
-    
+
     train_loss, val_loss = trainer.train()
-    
+
+    return train_loss, val_loss
+
+
+if __name__ == "__main__":
+    import tyro
+
+    cfg = tyro.cli(ModelConfig)
+    main(cfg)

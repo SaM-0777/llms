@@ -18,8 +18,8 @@ class Block(nn.Module):
         self.head_dim = cfg.head_dim
         self.attention = Attention(cfg)
         self.feed_forward = FeedForward(cfg)
-        self.attention_norm = RMSNorm(embdding_dim=cfg.embedding_dim, eps=cfg.norm_eps)
-        self.ffn_norm = RMSNorm(embdding_dim=cfg.embedding_dim, eps=cfg.norm_eps)
+        self.attention_norm = RMSNorm(embedding_dim=cfg.embedding_dim, eps=cfg.norm_eps)
+        self.ffn_norm = RMSNorm(embedding_dim=cfg.embedding_dim, eps=cfg.norm_eps)
 
     def forward(
         self,
@@ -29,7 +29,7 @@ class Block(nn.Module):
         mask: torch.Tensor | None,
     ):
         h = x + self.attention(self.attention_norm(x), freq_cis, start_pos, mask)
-        out = h + self.feed_forward(self.ffn_norm(x))
+        out = h + self.feed_forward(self.ffn_norm(h))
         return out
 
 
@@ -49,7 +49,7 @@ class LLama3_xs(nn.Module):
             theta_base=cfg.rope_theta,
         )
 
-        self.norm = RMSNorm(embdding_dim=cfg.embedding_dim, eps=cfg.norm_eps)
+        self.norm = RMSNorm(embedding_dim=cfg.embedding_dim, eps=cfg.norm_eps)
         self.blocks = nn.ModuleList([Block(i, cfg) for i in range(cfg.num_blocks)])
 
         self.out_head = nn.Linear(
@@ -63,16 +63,19 @@ class LLama3_xs(nn.Module):
         start_pos: int = 0,
     ) -> tuple[torch.Tensor, torch.Tensor | None]:
         B, seqlen = x.shape
+        print(f"B, seqlen {B}, {seqlen}")
         h = self.embedding(x)
+        print(f"embedding shape {h.shape}")
         self.freq_cis = self.freq_cis.to(h.device)
         freq_cis = self.freq_cis[start_pos : start_pos + seqlen]
+        print(f"freq_cis shape {freq_cis.shape}")
 
         mask = None
         if seqlen > 1:
             mask = torch.full((seqlen, seqlen), float("-inf"), device=x.device)
             mask = torch.triu(mask, diagonal=1)
             mask = torch.hstack(
-                [torch.zeros((seqlen, seqlen), device=x.device), mask]
+                [torch.zeros((seqlen, start_pos), device=x.device), mask]
             ).to(h.dtype)
 
         for block in self.blocks:
@@ -83,6 +86,7 @@ class LLama3_xs(nn.Module):
 
         loss = None
         if targets is not None:
+            targets = targets.float()
             loss = F.cross_entropy(
                 logits.reshape(-1, logits.size(-1)), targets.reshape(-1)
             )
