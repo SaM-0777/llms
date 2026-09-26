@@ -75,43 +75,29 @@ class Attention(nn.Module):
     ) -> torch.Tensor:
         B, seqlen, _ = x.shape
         q, k, v = self.W_q(x), self.W_k(x), self.W_v(x)
-        
-        print(f"q k v {q.shape} {k.shape} {v.shape}")
 
         q = q.view(B, seqlen, self.num_heads, self.head_dim)
         k = k.view(B, seqlen, self.num_kv_heads, self.head_dim)
         v = v.view(B, seqlen, self.num_kv_heads, self.head_dim)
 
-        print(f"q k v {q.shape} {k.shape} {v.shape}")
-
         q, k = apply_rotary_emb(q, k, freq_cis)
-
-        print(f"q k {q.shape} {k.shape}")
 
         self.cache_k[:B, start_pos : start_pos + seqlen] = k  # type: ignore
         self.cache_v[:B, start_pos : start_pos + seqlen] = v  # type: ignore
-        
-        print(f"cache_k cache_v {self.cache_k.shape} {self.cache_v.shape}")
 
         keys = self.cache_k[:B, : start_pos + seqlen]  # type: ignore
         values = self.cache_v[:B, : start_pos + seqlen]  # type: ignore
 
-        keys = keys.repeat_interleave(self.n_rep, dim=1)
-        values = values.repeat_interleave(self.n_rep, dim=1)
-        
-        print(f"keys values {keys.shape} {values.shape}")
+        keys = keys.repeat_interleave(self.n_rep, dim=2)
+        values = values.repeat_interleave(self.n_rep, dim=2)
 
         q = q.transpose(1, 2)
         
         keys = keys.transpose(1, 2)
         values = values.transpose(1, 2)
-        
-        print(f"q keys values {q.shape} {keys.shape} {values.shape}")
 
         scores = torch.matmul(q, keys.transpose(2, 3)) / math.sqrt(self.head_dim)
         if mask is not None:
-            print(f"mask shape {mask.shape}")
-            print(f"scores shape {scores.shape}")
             scores = scores + mask
         scores = torch.softmax(scores.float(), dim=-1).to(q.dtype)
         output = torch.matmul(scores, values)

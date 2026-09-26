@@ -13,7 +13,7 @@ def load_checkpoint(model, resume_from_path, device):
         )
 
         state_dict = {}
-        for key, value in checkpoint.items():
+        for key, value in checkpoint.model.items():
             if key.startswith("_orig_mod."):
                 new_key = key.replace("_orig_mod.", "")
                 state_dict[new_key] = value
@@ -92,7 +92,8 @@ def get_model_stats(model, cfg):
         "train/learning_rate": cfg.learning_rate,
         "train/min_lr": cfg.min_lr,
         "train/warmup_optimizer_steps": cfg.warmup_optimizer_steps,
-        "train/weight_decay": 0.1,
+        "Train/warmup_steps": cfg.warmup_steps,
+        "train/weight_decay": cfg.weight_decay,
         "runtime/device": str(cfg.device),
         "runtime/dtype": str(cfg.dtype),
     }

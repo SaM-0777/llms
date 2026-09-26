@@ -45,6 +45,10 @@ class Trainer:
             models_dir, f"best_model_{timestamp}.pt"
         )
 
+        self.optimizer_step = 0
+        self.tokens_seen = 0
+        self.last_log_time = time.time()
+        self.last_tokens_seen = 0
         self.train_loss_list = []
         self.validation_loss_list = []
 
@@ -79,6 +83,8 @@ class Trainer:
             else:
                 inputs, targets = inputs.to(self.device), targets.to(self.device)
 
+            self.tokens_seen += inputs.numel()
+
             with self.ctx:
                 _, loss = self.model(x=inputs, targets=targets)
                 loss = loss / self.args.gradient_accumulation_steps
@@ -94,21 +100,56 @@ class Trainer:
                 self.scaler.update()
                 self.optimizer.zero_grad(set_to_none=True)
                 self.scheduler.step()
+                self.optimizer_step += 1
 
             if (iter_num + 1) % self.args.log_interval == 0:
+                current_loss = loss.item() * self.args.gradient_accumulation_steps
+                current_lr = self.optimizer.param_groups[0]["lr"]
+
+                now = time.time()
+                elapsed = now - self.last_log_time
+
+                tokens_since_log = self.tokens_seen - self.last_tokens_seen
+                tokens_per_second = tokens_since_log / elapsed if elapsed > 0 else 0.0
+
+                self.writer.add_scalar(
+                    "Train/loss",
+                    current_loss,
+                    self.optimizer_step,
+                )
                 self.writer.add_scalar(
                     "Train/learning_rate",
                     self.optimizer.param_groups[0]["lr"],
                     iter_num,
                 )
                 self.writer.add_scalar(
-                    "Train/loss_step",
-                    loss.item() * self.args.gradient_accumulation_steps,
-                    iter_num,
+                    "Train/tokens_seen",
+                    self.tokens_seen,
+                    self.optimizer_step,
+                )
+                self.writer.add_scalar(
+                    "Train/tokens_per_second",
+                    tokens_per_second,
+                    self.optimizer_step,
+                )
+                self.writer.add_scalar(
+                    "Train/microstep",
+                    iter_num + 1,
+                    self.optimizer_step,
+                )
+                self.writer.add_scalar(
+                    "Train/optimizer_step",
+                    self.optimizer_step,
+                    self.optimizer_step,
                 )
                 pbar.set_description(
-                    f"Loss: {loss.item() * self.args.gradient_accumulation_steps:.4f}"
+                    f"Loss: {current_loss:.4f} "
+                    f"| LR: {current_lr:.2e} "
+                    f"| tok/s: {tokens_per_second:,.0f}"
                 )
+
+                self.last_log_time = now
+                self.last_tokens_seen = self.tokens_seen
 
             if (iter_num + 1) % self.args.eval_interval == 0 and iter_num != 0:
                 metrics = self.evaluate_model()
@@ -121,7 +162,7 @@ class Trainer:
                 )
 
                 for key, value in metrics.items():
-                    self.writer.add_scalar(f"Metrics/{key}", value, iter_num + 1)
+                    self.writer.add_scalar(f"Metrics/{key}", value, self.optimizer_step)
 
                 self.train_loss_list.append(metrics["train_loss"])
                 self.validation_loss_list.append(metrics["val_loss"])
@@ -129,6 +170,23 @@ class Trainer:
                 if metrics["val_loss"] < best_val_loss:
                     best_val_loss = metrics["val_loss"]
                     best_iter_num = iter_num + 1
+
+                    self.writer.add_scalar(
+                        "Eval/best_val_loss",
+                        best_val_loss,
+                        self.optimizer_step,
+                    )
+                    self.writer.add_scalar(
+                        "Eval/best_val_perplexity",
+                        math.exp(best_val_loss),
+                        self.optimizer_step,
+                    )
+                    self.writer.add_scalar(
+                        "Eval/best_step",
+                        best_iter_num,
+                        self.optimizer_step,
+                    )
+
                     torch.save(self.model.state_dict(), self.best_model_params_path)
 
             if (iter_num + 1) % 1_000_000 == 0:
@@ -147,6 +205,7 @@ class Trainer:
                 torch.save(checkpoint, checkpoint_path)
                 print(f"\nSaved periodic checkpoint to {checkpoint_path}")
 
+        self.writer.flush()
         self.writer.close()
         end_time = time.time()
         print(f"\nTraining completed in {end_time - start_time:.2f} seconds.")

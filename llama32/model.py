@@ -63,12 +63,9 @@ class LLama3_xs(nn.Module):
         start_pos: int = 0,
     ) -> tuple[torch.Tensor, torch.Tensor | None]:
         B, seqlen = x.shape
-        print(f"B, seqlen {B}, {seqlen}")
         h = self.embedding(x)
-        print(f"embedding shape {h.shape}")
         self.freq_cis = self.freq_cis.to(h.device)
         freq_cis = self.freq_cis[start_pos : start_pos + seqlen]
-        print(f"freq_cis shape {freq_cis.shape}")
 
         mask = None
         if seqlen > 1:

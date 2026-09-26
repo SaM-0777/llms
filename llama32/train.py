@@ -1,8 +1,7 @@
-from dataclasses import asdict
 import os
 from datetime import datetime
 from itertools import cycle
-import numpy as np
+
 import torch
 from torch.optim.lr_scheduler import LinearLR, SequentialLR, CosineAnnealingLR
 from torch.utils.tensorboard import SummaryWriter
@@ -31,19 +30,19 @@ def main(cfg: ModelConfig):
     torch.manual_seed(cfg.seed)
     device, dtype, ptdtype, ctx, scaler = get_device_settings()
 
-    if cfg.wandb_log:
-        wandb.init(
-            project=cfg.project_name,
-            name=f"llama3_xs_{timestamp}",
-            config=asdict(cfg),
-        )
-
     cfg.device = torch.device(device)
     cfg.dtype = ptdtype
 
     tokenizer = load_tokenizer(cfg.tokenizer_name)
     vocab_size = tokenizer.vocab_size
     cfg.vocab_size = vocab_size
+
+    if cfg.wandb_log:
+        wandb.init(
+            project=cfg.project_name,
+            name=f"llama32_{timestamp}",
+            sync_tensorboard=True,
+        )
 
     model = LLama3_xs(cfg)
 
@@ -54,8 +53,13 @@ def main(cfg: ModelConfig):
     model.to(device)
 
     stats = get_model_stats(model, cfg)
-    wandb.config.update(stats)
-    wandb.log(stats, step=0)
+    for name, value in stats.items():
+        writer.add_scalar(
+            name,
+            value,
+            0,
+        )
+    writer.flush()
 
     # compile the model
     print(f"Compiling the model...")
@@ -72,10 +76,12 @@ def main(cfg: ModelConfig):
     )
 
     # Scheduler
-    num_optimizer_steps = cfg.max_iters // cfg.gradient_accumulation_steps
-    warmup_optimizer_steps = cfg.warmup_steps // cfg.gradient_accumulation_steps
+    num_optimizer_steps = (
+        cfg.max_iters + cfg.gradient_accumulation_steps - 1
+    ) // cfg.gradient_accumulation_steps
+    warmup_optimizer_steps = cfg.warmup_steps
 
-    scheduler_warmup = LinearLR(optimizer, total_iters=cfg.warmup_steps)
+    scheduler_warmup = LinearLR(optimizer, total_iters=warmup_optimizer_steps)
     scheduler_delay = CosineAnnealingLR(
         optimizer,
         T_max=(num_optimizer_steps - warmup_optimizer_steps),
@@ -84,7 +90,7 @@ def main(cfg: ModelConfig):
     scheduler = SequentialLR(
         optimizer,
         schedulers=[scheduler_warmup, scheduler_delay],
-        milestones=[cfg.warmup_steps],
+        milestones=[warmup_optimizer_steps],
     )
 
     # Dataset loading
@@ -138,6 +144,9 @@ def main(cfg: ModelConfig):
     )
 
     train_loss, val_loss = trainer.train()
+
+    if cfg.wandb_log and wandb.run is not None:
+        wandb.finish()
 
     return train_loss, val_loss
 
