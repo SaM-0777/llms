@@ -1,6 +1,7 @@
 import math
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from .config import ModelConfig
 from .rope import apply_rotary_emb
@@ -93,17 +94,26 @@ class Attention(nn.Module):
             keys = k
             values = v
 
-        keys = keys.repeat_interleave(self.n_rep, dim=2)
-        values = values.repeat_interleave(self.n_rep, dim=2)
+        # keys = keys.repeat_interleave(self.n_rep, dim=2)
+        # values = values.repeat_interleave(self.n_rep, dim=2)
 
         q = q.transpose(1, 2)
         keys = keys.transpose(1, 2)
         values = values.transpose(1, 2)
 
-        scores = torch.matmul(q, keys.transpose(2, 3)) / math.sqrt(self.head_dim)
-        if mask is not None:
-            scores = scores + mask
-        scores = torch.softmax(scores.float(), dim=-1).to(q.dtype)
-        output = torch.matmul(scores, values)
+        output = F.scaled_dot_product_attention(
+            q,
+            keys,
+            values,
+            attn_mask=mask,
+            dropout_p=0.0,
+            enable_gqa=True,
+        )
+
+        #scores = torch.matmul(q, keys.transpose(2, 3)) / math.sqrt(self.head_dim)
+        #if mask is not None:
+        #    scores = scores + mask
+        #scores = torch.softmax(scores.float(), dim=-1).to(q.dtype)
+        #output = torch.matmul(scores, values)
         output = output.transpose(1, 2).contiguous().view(B, seqlen, -1)
         return self.out_proj(output)

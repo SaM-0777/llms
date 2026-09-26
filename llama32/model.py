@@ -85,7 +85,6 @@ class LLama3_xs(nn.Module):
 
         loss = None
         if targets is not None:
-            targets = targets.float()
             loss = F.cross_entropy(
                 logits.reshape(-1, logits.size(-1)), targets.reshape(-1)
             )

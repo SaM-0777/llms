@@ -91,9 +91,7 @@ def get_model_stats(model, cfg):
         "train/total_tokens": total_tokens,
         "train/learning_rate": cfg.learning_rate,
         "train/min_lr": cfg.min_lr,
-        "train/warmup_optimizer_steps": cfg.warmup_optimizer_steps,
+        #"train/warmup_optimizer_steps": cfg.warmup_optimizer_steps,
         "Train/warmup_steps": cfg.warmup_steps,
         "train/weight_decay": cfg.weight_decay,
-        "runtime/device": str(cfg.device),
-        "runtime/dtype": str(cfg.dtype),
     }

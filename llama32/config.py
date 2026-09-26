@@ -26,6 +26,7 @@ class ModelConfig:
     # training configs
     data_dir: str | Path = "data/fineweb_1.25B"
     resume_from: str | Path | None = None
+    num_dataset_workers: int | None = 8
     learning_rate: float = 1e-4
     min_lr: float = 5e-5
     weight_decay: float = 0.1

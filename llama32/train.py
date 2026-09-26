@@ -94,6 +94,11 @@ def main(cfg: ModelConfig):
     )
 
     # Dataset loading
+    num_workers = (
+        cfg.num_dataset_workers
+        if cfg.num_dataset_workers is not None
+        else os.cpu_count() // 2
+    )
     train_dataset = MemmapDataset(
         os.path.join(cfg.data_dir, "train.bin"), cfg.block_size
     )
@@ -101,18 +106,18 @@ def main(cfg: ModelConfig):
         train_dataset,
         batch_size=cfg.batch_size,
         shuffle=True,
-        num_workers=os.cpu_count() // 2,  # type: ignore
+        num_workers=num_workers,  # type: ignore
         pin_memory=True if device == "cuda" else False,
-        persistent_workers=True,
+        persistent_workers=True if num_workers > 0 else False,
     )
 
     val_dataset = MemmapDataset(os.path.join(cfg.data_dir, "test.bin"), cfg.block_size)
     val_loader = DataLoader(
         val_dataset,
         batch_size=cfg.batch_size,
-        num_workers=os.cpu_count() // 2,  # type: ignore
+        num_workers=num_workers,  # type: ignore
         pin_memory=True if device == "cuda" else False,
-        persistent_workers=True,
+        persistent_workers=True if num_workers > 0 else False,
     )
 
     train_eval_loader = DataLoader(
