@@ -22,6 +22,7 @@ class Trainer(HFTrainer):
         super().__init__(*args, **kwargs)
 
         self.min_lr = min_lr
+        self._training_start_time = None
         self._last_log_time = time.time()
         self._last_tokens_seen = 0
 
@@ -31,7 +32,8 @@ class Trainer(HFTrainer):
 
         dataloader = DataLoader(
             self.train_dataset,
-            batch_size=self._train_batch_size,
+            collate_fn=self._collate_batch,
+            batch_size=self.args.train_batch_size,
             shuffle=True,
             num_workers=self.args.dataloader_num_workers,
             pin_memory=self.args.dataloader_pin_memory,
@@ -54,6 +56,7 @@ class Trainer(HFTrainer):
 
         dataloader = DataLoader(
             eval_dataset,
+            collate_fn=self._collate_batch,
             batch_size=self.args.eval_batch_size,
             shuffle=False,
             num_workers=self.args.dataloader_num_workers,
@@ -67,6 +70,16 @@ class Trainer(HFTrainer):
 
         return self.accelerator.prepare(dataloader)
 
+    @staticmethod
+    def _collate_batch(batch: list[tuple[torch.Tensor, torch.Tensor]]):
+        inputs = torch.stack([item[0] for item in batch])
+        targets = torch.stack([item[1] for item in batch])
+
+        return {
+            "x": inputs,
+            "targets": targets,
+        }
+
     def compute_loss(
         self,
         model: nn.Module,
@@ -74,7 +87,19 @@ class Trainer(HFTrainer):
         return_outputs: bool = False,
         num_items_in_batch: torch.Tensor | int | None = None,
     ) -> torch.Tensor | tuple[torch.Tensor, Any]:
-        print(f"inputs keys {inputs.keys()}")
+        x = inputs["x"]
+        targets = inputs["targets"]
+        logits, loss = model(
+            x=x,
+            targets=targets,
+        )
+
+        if loss is None:
+            raise RuntimeError("Model returned None for loss.")
+        if return_outputs:
+            return loss, logits
+
+        return loss
 
     def create_optimizer(self, model: nn.Module | None = None) -> optim.Optimizer:
         if self.optimizer is not None:

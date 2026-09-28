@@ -40,6 +40,7 @@ class Block(GradientCheckpointingLayer):
 
 
 class LLama3_xs(nn.Module):
+    main_input_name = "x"
     supports_gradient_checkpointing = True
 
     def __init__(self, cfg: ModelConfig) -> None:

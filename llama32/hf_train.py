@@ -82,7 +82,7 @@ def main(cfg: ModelConfig):
         eval_steps=cfg.eval_intervals,
         # utils
         bf16=True,
-        torch_compile=True,
+        torch_compile=cfg.torch_compile,
         # log
         logging_strategy="steps",
         logging_steps=cfg.log_interval,
@@ -91,7 +91,6 @@ def main(cfg: ModelConfig):
         save_steps=cfg.save_interval,
         save_total_limit=3,
         metric_for_best_model="eval_loss",
-        greater_is_better=False,
         # dataloader
         dataloader_num_workers=(
             cfg.num_dataset_workers if cfg.num_dataset_workers is not None else os.cpu_count() // 2  # type: ignore
