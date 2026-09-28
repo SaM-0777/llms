@@ -27,9 +27,8 @@ class Block(nn.Module):
         freq_cis: torch.Tensor,
         start_pos: int,
         mask: torch.Tensor | None,
-        use_kv_cache: bool = False,
     ):
-        h = x + self.attention(self.attention_norm(x), freq_cis, start_pos, mask, use_kv_cache)
+        h = x + self.attention(self.attention_norm(x), freq_cis, start_pos, mask)
         out = h + self.feed_forward(self.ffn_norm(h))
         return out
 
@@ -62,7 +61,6 @@ class LLama3_xs(nn.Module):
         x: torch.Tensor,
         targets: torch.Tensor | None = None,
         start_pos: int = 0,
-        use_kv_cache: bool = False,
     ) -> tuple[torch.Tensor, torch.Tensor | None]:
         B, seqlen = x.shape
         h = self.embedding(x)
@@ -78,7 +76,7 @@ class LLama3_xs(nn.Module):
             ).to(h.dtype)
 
         for block in self.blocks:
-            h = block(h, freq_cis, start_pos, mask, use_kv_cache)
+            h = block(h, freq_cis, start_pos, mask)
 
         h = self.norm(h)
         logits = self.out_head(h).float()
@@ -90,3 +88,46 @@ class LLama3_xs(nn.Module):
             )
 
         return logits, loss
+
+    @torch.no_grad()
+    def generate(
+        self,
+        x: torch.Tensor,
+        max_new_tokens: int,
+        temperature: float = 1.0,
+        top_k: int | None = None,
+        eos_id: int | None = None,
+    ):
+        assert (
+            len(x.shape) == 2
+        ), "Input should be a 2D array of token ids of shape [B, total_token_ids]"
+
+        total_tokens = x.size(1)
+        context_length = self.cfg.max_sequence_length
+        assert total_tokens <= context_length, (
+            f"Input has {total_tokens} tokens, "
+            f"but model context length is {context_length}"
+        )
+
+        for _ in range(max_new_tokens):
+            x_context = x if x.size(1) <= context_length else x[:, -context_length:]
+
+            logits, _ = self(x=x_context)
+            logits = logits[:, -1, :]
+
+            if temperature == 0.0:
+                _, token_id_next = torch.topk(logits, k=1, dim=-1)
+            else:
+                logits = logits / temperature
+                if top_k is not None:
+                    v, _ = torch.topk(logits, min(top_k, logits.size(-1)))
+                    logits[logits < v[:, [-1]]] = float("-inf")
+
+                probs = F.softmax(logits, dim=-1)
+                token_id_next = torch.multinomial(probs, num_samples=1)
+
+            x = torch.cat((x, token_id_next), dim=1)
+            if eos_id is not None and token_id_next.item() == eos_id:
+                break
+
+        return x

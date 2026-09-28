@@ -1,7 +1,8 @@
 import os
 from datetime import datetime
-from itertools import cycle
+#from itertools import cycle
 
+import tiktoken
 import torch
 from torch.optim.lr_scheduler import LinearLR, SequentialLR, CosineAnnealingLR
 from torch.utils.tensorboard import SummaryWriter
@@ -13,7 +14,7 @@ from .config import ModelConfig
 from .dataset import MemmapDataset
 from .model import LLama3_xs
 from .trainer import Trainer
-from .train_utils import get_model_stats, load_checkpoint, get_device_settings
+from .train_utils import load_checkpoint, get_device_settings, get_model_stats
 
 
 def load_tokenizer(tokenizer_name: str):
@@ -24,17 +25,28 @@ def load_tokenizer(tokenizer_name: str):
     return tokenizer
 
 
+def load_gpt2_tokenizer():
+    get2_tokenizer = tiktoken.get_encoding("gpt2")
+    return get2_tokenizer
+
+
+def infinite_loader(loader):
+    while True:
+        for batch in loader:
+            yield batch
+
+
 def main(cfg: ModelConfig):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-    writer = SummaryWriter(log_dir=f"runs/llama32_{timestamp}")
     torch.manual_seed(cfg.seed)
     device, dtype, ptdtype, ctx, scaler = get_device_settings()
 
     cfg.device = torch.device(device)
     cfg.dtype = ptdtype
 
-    tokenizer = load_tokenizer(cfg.tokenizer_name)
-    vocab_size = tokenizer.vocab_size
+    # tokenizer = load_tokenizer(cfg.tokenizer_name)
+    tokenizer = load_gpt2_tokenizer()
+    vocab_size = tokenizer.n_vocab
     cfg.vocab_size = vocab_size
 
     if cfg.wandb_log:
@@ -43,7 +55,9 @@ def main(cfg: ModelConfig):
             name=f"llama32_{timestamp}",
             sync_tensorboard=True,
         )
-
+    writer = SummaryWriter(log_dir=f"runs/llama32_{timestamp}")
+    
+    cfg.use_kv_cache = False # do not use kv_cache in this training setup 
     model = LLama3_xs(cfg)
 
     if cfg.resume_from:
@@ -51,16 +65,11 @@ def main(cfg: ModelConfig):
             return
 
     model.to(device)
-
+    
     stats = get_model_stats(model, cfg)
-    for name, value in stats.items():
-        writer.add_scalar(
-            name,
-            value,
-            0,
-        )
-    writer.flush()
-
+    print(f"Trainable model params {stats.get("model/trainable_params")}")
+    print(f"Total model params {stats.get("model/total_params")}")
+    
     # compile the model
     print(f"Compiling the model...")
     model = torch.compile(model)
@@ -97,10 +106,10 @@ def main(cfg: ModelConfig):
     num_workers = (
         cfg.num_dataset_workers
         if cfg.num_dataset_workers is not None
-        else os.cpu_count() // 2
+        else os.cpu_count() // 2  # type: ignore
     )
     train_dataset = MemmapDataset(
-        os.path.join(cfg.data_dir, "train.bin"), cfg.block_size
+        os.path.join(cfg.data_dir, "gpt2_train.bin"), cfg.block_size
     )
     train_loader = DataLoader(
         train_dataset,
@@ -111,7 +120,9 @@ def main(cfg: ModelConfig):
         persistent_workers=True if num_workers > 0 else False,
     )
 
-    val_dataset = MemmapDataset(os.path.join(cfg.data_dir, "test.bin"), cfg.block_size)
+    val_dataset = MemmapDataset(
+        os.path.join(cfg.data_dir, "gpt2_test.bin"), cfg.block_size
+    )
     val_loader = DataLoader(
         val_dataset,
         batch_size=cfg.batch_size,
@@ -124,13 +135,13 @@ def main(cfg: ModelConfig):
         train_dataset,
         batch_size=cfg.batch_size,
         shuffle=False,
-        num_workers=os.cpu_count() // 2,  # type: ignore
+        num_workers=num_workers,  # type: ignore
         pin_memory=True if device == "cuda" else False,
-        persistent_workers=True,
+        persistent_workers=True if num_workers > 0 else False,
     )
     eval_iterators = {
-        "train": cycle(train_eval_loader),
-        "val": cycle(val_loader),
+        "train": infinite_loader(train_eval_loader),
+        "val": infinite_loader(val_loader),
     }
 
     trainer = Trainer(
@@ -159,5 +170,6 @@ def main(cfg: ModelConfig):
 if __name__ == "__main__":
     import tyro
 
+    # python -m llama32.train --max_iters 500000 --eval_intervals 10000 --wandb_log
     cfg = tyro.cli(ModelConfig)
     main(cfg)

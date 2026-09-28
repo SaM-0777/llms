@@ -17,3 +17,4 @@ wheels/
 data/
 runs/
 wandb/
+checkpoints/

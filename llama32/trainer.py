@@ -192,7 +192,7 @@ class Trainer:
             if (iter_num + 1) % 1_000_000 == 0:
                 millions = (iter_num + 1) // 1_000_000
                 checkpoint_path = os.path.join(
-                    self.models_dir, f"model_{self.timestamp}@{millions}M.pt"
+                    self.models_dir, f"llama32_model_{self.timestamp}@{millions}M.pt"
                 )
                 checkpoint = {
                     "model": self.model.state_dict(),

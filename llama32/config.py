@@ -16,6 +16,7 @@ class ModelConfig:
     num_blocks: int = 18
     max_batch_size: int = 32
     hidden_dim: int = 2048
+    use_kv_cache: bool = False
 
     seed: int = 42
 
