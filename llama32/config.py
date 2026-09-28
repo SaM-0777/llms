@@ -25,12 +25,18 @@ class ModelConfig:
     dtype: torch.dtype = torch.bfloat16
 
     # training configs
+    output_dir: str | Path = "checkpoints/llama32"
     data_dir: str | Path = "data/fineweb_1.25B"
     resume_from: str | Path | None = None
     num_dataset_workers: int | None = 8
     learning_rate: float = 1e-4
     min_lr: float = 5e-5
+    adam_epsilon: float = 1e-9
+    adam_beta1: float = 0.9
+    adam_beta2: float = 0.95
     weight_decay: float = 0.1
+    max_grad_norm: float = 1.0
+    gradient_checkpointing: bool = True
     max_iters: int = 150_000
     warmup_steps: int = 1000
     batch_size: int = 32
@@ -39,6 +45,7 @@ class ModelConfig:
     eval_intervals: int = 500
     eval_iters: int = 200
     log_interval: int = 10
+    save_interval: int = 1000
 
     # Project configs
     project_name: str = "LLama_32"
