@@ -59,9 +59,6 @@ def main(cfg: ModelConfig):
     eval_dataset = MemmapDataset(
         os.path.join(cfg.data_dir, "gpt2_test.bin"), cfg.block_size
     )
-    test_dataset = MemmapDataset(
-        os.path.join(cfg.data_dir, "gpt2_test.bin"), cfg.block_size
-    )
 
     training_args = TrainingArguments(
         output_dir=str(cfg.output_dir),
@@ -74,7 +71,7 @@ def main(cfg: ModelConfig):
         per_device_eval_batch_size=cfg.batch_size,
         gradient_accumulation_steps=cfg.gradient_accumulation_steps,
         max_grad_norm=cfg.max_grad_norm,
-        # gradient_checkpointing=cfg.gradient_checkpointing,
+        gradient_checkpointing=cfg.gradient_checkpointing,
         # optimizer
         adam_beta1=cfg.adam_beta1,
         adam_beta2=cfg.adam_beta2,
@@ -120,7 +117,6 @@ def main(cfg: ModelConfig):
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
-        test_dataset=test_dataset,
         compute_metrics=compute_metrics,
     )
 

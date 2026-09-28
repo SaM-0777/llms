@@ -1,6 +1,12 @@
+import functools
+from typing import Any, Callable
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.utils.checkpoint import checkpoint
+from transformers import PreTrainedModel
+from transformers.modeling_layers import GradientCheckpointingLayer
 
 from .config import ModelConfig
 from .rope import compute_rope_params
@@ -9,7 +15,7 @@ from .attention import Attention
 from .feed_forward import FeedForward
 
 
-class Block(nn.Module):
+class Block(GradientCheckpointingLayer):
     def __init__(self, layer_id: int, cfg: ModelConfig) -> None:
         super().__init__()
         self.layer_id = layer_id
@@ -34,6 +40,8 @@ class Block(nn.Module):
 
 
 class LLama3_xs(nn.Module):
+    supports_gradient_checkpointing = True
+
     def __init__(self, cfg: ModelConfig) -> None:
         super().__init__()
         self.cfg = cfg
@@ -55,6 +63,76 @@ class LLama3_xs(nn.Module):
         self.out_head = nn.Linear(
             cfg.embedding_dim, cfg.vocab_size, bias=False, dtype=cfg.dtype
         )
+
+        self.gradient_checkpointing = False
+
+    def gradient_checkpointing_enable(
+        self,
+        gradient_checkpointing_kwargs=None,
+        every_n_layers: int = 1,
+        offload: bool = False,
+    ):
+        if not self.supports_gradient_checkpointing:
+            raise ValueError(
+                f"{self.__class__.__name__} does not support gradient checkpointing."
+            )
+
+        if gradient_checkpointing_kwargs is None:
+            gradient_checkpointing_kwargs = {"use_reentrant": False}
+
+        if offload:
+            raise NotImplementedError(f"gradient checkpoint offload not implemente")
+        else:
+            checkpoint_func = checkpoint
+
+        gradient_checkpointing_func = functools.partial(
+            checkpoint_func, **gradient_checkpointing_kwargs
+        )
+        self._set_gradient_checkpointing(
+            enable=True,
+            gradient_checkpointing_func=gradient_checkpointing_func,
+            every_n_layers=every_n_layers,
+        )
+
+    def gradient_checkpoinint_disable(self):
+        self._set_gradient_checkpointing(enable=False)
+
+    def _set_gradient_checkpointing(
+        self,
+        enable: bool = True,
+        gradient_checkpointing_func: Callable[..., Any] = checkpoint,
+        every_n_layers: int = 1,
+    ):
+        is_gradient_checkpointing_set = False
+        layer_index = 0
+
+        if hasattr(self, "gradient_checkpointing"):
+            self._gradient_checkpointing_func = gradient_checkpointing_func
+            self.gradient_checkpointing = enable
+            is_gradient_checkpointing_set = True
+
+        for module in self.modules():
+            if hasattr(module, "gradient_checkpointing"):
+                setattr(
+                    module, "_gradient_checkpointing_func", gradient_checkpointing_func
+                )
+
+                if enable and isinstance(module, GradientCheckpointingLayer):
+                    setattr(
+                        module,
+                        "gradient_checkpointing",
+                        layer_index % every_n_layers == 0,
+                    )
+                    layer_index += 1
+                else:
+                    setattr(module, "gradient_checkpointing", enable)
+                is_gradient_checkpointing_set = True
+
+        if not is_gradient_checkpointing_set:
+            raise ValueError(
+                f"{self.__class__.__name__} is not compatible with gradient checkpointing. Make sure all the architecture support it by setting a boolean attribute"
+                " `gradient_checkpointing` to modules of the model that uses checkpointing."
+            )
 
     def forward(
         self,
