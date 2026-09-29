@@ -74,7 +74,7 @@ class Attention(nn.Module):
     def forward(
         self,
         x: torch.Tensor,
-        freq_cis: torch.Tensor,
+        freq_cis: tuple[torch.Tensor, torch.Tensor],
         start_pos: int,
         mask: torch.Tensor | None,
     ) -> torch.Tensor:

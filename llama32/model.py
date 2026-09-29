@@ -30,7 +30,7 @@ class Block(GradientCheckpointingLayer):
     def forward(
         self,
         x: torch.Tensor,
-        freq_cis: torch.Tensor,
+        freq_cis: tuple[torch.Tensor, torch.Tensor],
         start_pos: int,
         mask: torch.Tensor | None,
     ):
@@ -143,8 +143,12 @@ class LLama3_xs(nn.Module):
     ) -> tuple[torch.Tensor, torch.Tensor | None]:
         B, seqlen = x.shape
         h = self.embedding(x)
-        self.freq_cis = self.freq_cis.to(h.device)
-        freq_cis = self.freq_cis[start_pos : start_pos + seqlen]
+        cos, sin = self.freq_cis
+        cos, sin = cos.to(h.device), sin.to(h.device)
+        freq_cis = (
+            cos[start_pos : start_pos + seqlen],
+            sin[start_pos : start_pos + seqlen],
+        )
 
         mask = None
         if seqlen > 1:

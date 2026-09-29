@@ -4,7 +4,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from .config import ModelConfig
-from .train import load_tokenizer
+from .train import load_gpt2_tokenizer
 from .model import LLama3_xs
 from .dataset import MemmapDataset
 
@@ -17,8 +17,8 @@ def main():
         else "mps" if torch.backends.mps.is_available() else "cpu"
     )
 
-    tokenizer = load_tokenizer(cfg.tokenizer_name)
-    vocab_size = tokenizer.vocab_size
+    tokenizer = load_gpt2_tokenizer()
+    vocab_size = tokenizer.n_vocab
     cfg.vocab_size = vocab_size
 
     print(f"Device:           {device}")
@@ -34,15 +34,15 @@ def main():
     print(f"Vocab size:       {cfg.vocab_size}")
 
     train_dataset = MemmapDataset(
-        os.path.join(cfg.data_dir, "test.bin"), cfg.block_size
+        os.path.join(cfg.data_dir, "gpt2_test.bin"), cfg.block_size
     )
     train_loader = DataLoader(
         train_dataset,
         batch_size=cfg.batch_size,
         shuffle=True,
-        num_workers=os.cpu_count() // 2,  # type: ignore
+        num_workers=0,  # type: ignore
         pin_memory=True if device == "cuda" else False,
-        persistent_workers=True,
+        persistent_workers=False,
     )
     inputs, targets = next(iter(train_loader))
     print(f"inputs.shape:     {inputs.shape}")
@@ -80,3 +80,64 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# import torch
+
+# from .rope import (
+#    compute_rope_params,
+#    apply_rotary_emb,
+#    apply_polar_rotary_emb,
+#    compute_polar_rope_params,
+# )
+
+# torch.manual_seed(42)
+
+# B = 2
+# S = 16
+# H = 8
+# H_KV = 4
+# D = 64
+
+# q = torch.randn(B, S, H, D)
+# k = torch.randn(B, S, H_KV, D)
+
+## New real-valued frequencies
+# cos, sin = compute_rope_params(
+#    dim=D,
+#    context_length=S,
+# )
+
+## Old complex frequencies
+# freq_cis = compute_polar_rope_params(
+#    dim=D,
+#    context_length=S,
+# )
+
+# q_real, k_real = apply_rotary_emb(
+#    q,
+#    k,
+#    (cos, sin),
+# )
+
+# q_complex, k_complex = apply_polar_rotary_emb(
+#    q,
+#    k,
+#    freq_cis,
+# )
+
+# print("q max error:")
+# print((q_real - q_complex).abs().max())
+
+# print("k max error:")
+# print((k_real - k_complex).abs().max())
+
+# print(
+#    "q allclose:",
+#    torch.allclose(q_real, q_complex, atol=1e-6, rtol=1e-5),
+# )
+
+# print(
+#    "k allclose:",
+#    torch.allclose(k_real, k_complex, atol=1e-6, rtol=1e-5),
+# )
