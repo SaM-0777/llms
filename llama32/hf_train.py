@@ -82,11 +82,9 @@ def main(cfg: ModelConfig):
         eval_steps=cfg.eval_intervals,
         # utils
         bf16=True,
-        # torch_compile=cfg.torch_compile,
         torch_compile=True,
         torch_compile_backend="inductor",
         torch_compile_mode="reduce-overhead",
-        torch_empty_cache_steps=cfg.gradient_accumulation_steps,
         # log
         logging_strategy="steps",
         logging_steps=cfg.log_interval,

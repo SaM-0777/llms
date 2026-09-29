@@ -34,7 +34,7 @@ class Trainer(HFTrainer):
             self.train_dataset,
             collate_fn=self._collate_batch,
             batch_size=self.args.train_batch_size,
-            shuffle=True,
+            shuffle=False,
             num_workers=self.args.dataloader_num_workers,
             pin_memory=self.args.dataloader_pin_memory,
             persistent_workers=(
