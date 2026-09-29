@@ -8,7 +8,7 @@ from transformers.trainer_utils import get_last_checkpoint
 from wandb.util import np
 
 from .config import ModelConfig
-from .dataset import MemmapDataset
+from .dataset import MemmapDataset, create_dataset
 from .model import LLama3_xs
 from .hf_trainer import Trainer
 from .train_utils import get_device_settings, get_model_stats
@@ -53,11 +53,15 @@ def main(cfg: ModelConfig):
     print(f"Trainable model params {stats.get("model/trainable_params")}")
     print(f"Total model params {stats.get("model/total_params")}")
 
-    train_dataset = MemmapDataset(
-        os.path.join(cfg.data_dir, "gpt2_train.bin"), cfg.block_size
+    train_dataset = create_dataset(
+        data_path=os.path.join(cfg.data_dir, "gpt2_train.bin"),
+        sequence_length=cfg.block_size,
+        shuffle_buffer_size=100_000,
     )
-    eval_dataset = MemmapDataset(
-        os.path.join(cfg.data_dir, "gpt2_test.bin"), cfg.block_size
+    eval_dataset = create_dataset(
+        data_path=os.path.join(cfg.data_dir, "gpt2_test.bin"),
+        sequence_length=cfg.block_size,
+        shuffle_buffer_size=100_000,
     )
 
     training_args = TrainingArguments(
@@ -82,9 +86,9 @@ def main(cfg: ModelConfig):
         eval_steps=cfg.eval_intervals,
         # utils
         bf16=True,
-        torch_compile=True,
-        torch_compile_backend="inductor",
-        torch_compile_mode="reduce-overhead",
+        torch_compile=False,
+        #torch_compile_backend="inductor",
+        #torch_compile_mode="reduce-overhead",
         # log
         logging_strategy="steps",
         logging_steps=cfg.log_interval,
@@ -139,6 +143,6 @@ def main(cfg: ModelConfig):
 if __name__ == "__main__":
     import tyro
 
-    # python -m llama32.train --max_iters 500000 --eval_intervals 10000 --wandb_log
+    # python -m llama32.hf_train --max_iters 500000 --eval_intervals 10000 --wandb_log
     cfg = tyro.cli(ModelConfig)
     main(cfg)

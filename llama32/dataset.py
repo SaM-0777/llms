@@ -1,6 +1,9 @@
+from pathlib import Path
+
 import numpy as np
 import torch
 from torch.utils.data import Dataset
+from datasets import IterableDataset
 
 
 class MemmapDataset(Dataset):
@@ -24,3 +27,46 @@ class MemmapDataset(Dataset):
             self.data[idx + 1 : idx + 1 + self.sequence_length].astype(np.int64)
         )
         return x, y
+
+
+def token_stream(
+    data_path: Path | str,
+    sequence_length: int,
+):
+    data = np.memmap(data_path, dtype=np.uint16, mode="r")
+    num_samples = ((len(data) - 1)) // sequence_length
+
+    for sample_idx in range(num_samples):
+        start = sample_idx * sequence_length
+
+        x = data[start : start + sequence_length].astype(np.int64, copy=True)
+        targets = data[start + 1 : start + sequence_length + 1].astype(
+            np.int64, copy=True
+        )
+
+        yield {
+            "x": x,
+            "targets": targets,
+        }
+
+
+def create_dataset(
+    data_path: str | Path,
+    sequence_length: int,
+    shuffle_buffer_size: int = 100_000,
+    seed: int = 42,
+):
+    dataset = IterableDataset.from_generator(
+        token_stream,
+        gen_kwargs={
+            "data_path": str(data_path),
+            "sequence_length": sequence_length,
+        },
+    )
+
+    dataset = dataset.shuffle(
+        seed=seed,
+        buffer_size=shuffle_buffer_size,
+    )
+
+    return dataset

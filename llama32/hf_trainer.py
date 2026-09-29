@@ -34,7 +34,6 @@ class Trainer(HFTrainer):
             self.train_dataset,
             collate_fn=self._collate_batch,
             batch_size=self.args.train_batch_size,
-            shuffle=False,
             num_workers=self.args.dataloader_num_workers,
             pin_memory=self.args.dataloader_pin_memory,
             persistent_workers=(
@@ -58,7 +57,6 @@ class Trainer(HFTrainer):
             eval_dataset,
             collate_fn=self._collate_batch,
             batch_size=self.args.eval_batch_size,
-            shuffle=False,
             num_workers=self.args.dataloader_num_workers,
             pin_memory=self.args.dataloader_pin_memory,
             persistent_workers=(
@@ -70,14 +68,12 @@ class Trainer(HFTrainer):
 
         return self.accelerator.prepare(dataloader)
 
-    @staticmethod
-    def _collate_batch(batch: list[tuple[torch.Tensor, torch.Tensor]]):
-        inputs = torch.stack([item[0] for item in batch])
-        targets = torch.stack([item[1] for item in batch])
-
+    def _collate_batch(self, features):
         return {
-            "x": inputs,
-            "targets": targets,
+            "x": torch.stack([torch.as_tensor(feature["x"]) for feature in features]),
+            "targets": torch.stack(
+                [torch.as_tensor(feature["targets"]) for feature in features]
+            ),
         }
 
     def compute_loss(
