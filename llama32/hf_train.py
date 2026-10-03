@@ -86,9 +86,9 @@ def main(cfg: ModelConfig):
         eval_steps=cfg.eval_intervals,
         # utils
         bf16=True,
-        torch_compile=False,
-        #torch_compile_backend="inductor",
-        #torch_compile_mode="reduce-overhead",
+        torch_compile=True,
+        torch_compile_backend="inductor",
+        torch_compile_mode="max-autotune",
         # log
         logging_strategy="steps",
         logging_steps=cfg.log_interval,
@@ -101,7 +101,7 @@ def main(cfg: ModelConfig):
         dataloader_num_workers=(
             cfg.num_dataset_workers if cfg.num_dataset_workers is not None else os.cpu_count() // 2  # type: ignore
         ),
-        dataloader_pin_memory=True,
+        dataloader_pin_memory=False,
         dataloader_persistent_workers=(
             cfg.num_dataset_workers > 0
             if cfg.num_dataset_workers is not None

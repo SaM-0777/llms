@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
-#from itertools import cycle
+
+# from itertools import cycle
 
 import tiktoken
 import torch
@@ -11,7 +12,7 @@ from transformers import AutoTokenizer
 import wandb
 
 from .config import ModelConfig
-from .dataset import MemmapDataset
+from .dataset import MemmapDataset, create_dataset
 from .model import LLama3_xs
 from .trainer import Trainer
 from .train_utils import load_checkpoint, get_device_settings, get_model_stats
@@ -56,8 +57,8 @@ def main(cfg: ModelConfig):
             sync_tensorboard=True,
         )
     writer = SummaryWriter(log_dir=f"runs/llama32_{timestamp}")
-    
-    cfg.use_kv_cache = False # do not use kv_cache in this training setup 
+
+    cfg.use_kv_cache = False  # do not use kv_cache in this training setup
     model = LLama3_xs(cfg)
 
     if cfg.resume_from:
@@ -65,11 +66,11 @@ def main(cfg: ModelConfig):
             return
 
     model.to(device)
-    
+
     stats = get_model_stats(model, cfg)
     print(f"Trainable model params {stats.get("model/trainable_params")}")
     print(f"Total model params {stats.get("model/total_params")}")
-    
+
     # compile the model
     print(f"Compiling the model...")
     model = torch.compile(model)
@@ -108,20 +109,24 @@ def main(cfg: ModelConfig):
         if cfg.num_dataset_workers is not None
         else os.cpu_count() // 2  # type: ignore
     )
-    train_dataset = MemmapDataset(
-        os.path.join(cfg.data_dir, "gpt2_train.bin"), cfg.block_size
+    train_dataset = create_dataset(
+        data_path=os.path.join(cfg.data_dir, "gpt2_train.bin"),
+        sequence_length=cfg.block_size,
+        shuffle_buffer_size=100_000,
     )
     train_loader = DataLoader(
         train_dataset,
         batch_size=cfg.batch_size,
-        shuffle=True,
+        shuffle=False,
         num_workers=num_workers,  # type: ignore
         pin_memory=True if device == "cuda" else False,
         persistent_workers=True if num_workers > 0 else False,
     )
 
-    val_dataset = MemmapDataset(
-        os.path.join(cfg.data_dir, "gpt2_test.bin"), cfg.block_size
+    val_dataset = create_dataset(
+        data_path=os.path.join(cfg.data_dir, "gpt2_test.bin"),
+        sequence_length=cfg.block_size,
+        shuffle_buffer_size=100_000,
     )
     val_loader = DataLoader(
         val_dataset,

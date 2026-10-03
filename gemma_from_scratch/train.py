@@ -18,7 +18,7 @@ from torch.utils.data import DataLoader
 
 from gemma_scratch.model import Gemma3Model
 from gemma_scratch.config import GEMMA3_CONFIG_CUSTOM
-from gemma_scratch.dataset import MemmapDataset
+from gemma_scratch.dataset import MemmapDataset, create_dataset
 from gemma_scratch.trainer import GemmaTrainer
 from gemma_scratch.training_utils import (
     set_seed,
@@ -46,10 +46,17 @@ def main(args):
 
     model.to(device)
 
+    total_params = sum(p.numel() for p in model.parameters())
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+    print(f"Trainable model params {trainable_params}")
+    print(f"Total model params {total_params}")
+
     # Compile the model
     if torch.__version__ >= "2.0":
         print("Compiling the model (this can take a while)")
-        model = torch.compile(model)
+        #model = torch.compile(model)
+        
 
     # AdamW is a robust optimizer with weight decay
     optimizer = torch.optim.AdamW(
@@ -78,25 +85,32 @@ def main(args):
     )
 
     # --- Data Loading ---
-    train_dataset = MemmapDataset(
-        os.path.join(args.data_dir, "train.bin"), args.sequence_length
+    # train_dataset = MemmapDataset(
+    #    os.path.join(args.data_dir, "train.bin"), args.sequence_length
+    # )
+    train_dataset = create_dataset(
+        data_path=os.path.join(args.data_dir, "gpt2_train.bin"),
+        sequence_length=args.block_size,
+        shuffle_buffer_size=100_000,
     )
     train_loader = DataLoader(
         train_dataset,
         batch_size=args.batch_size,
-        shuffle=True,
-        num_workers=os.cpu_count() // 2,
+        shuffle=False,
+        num_workers=1,
         pin_memory=True if device == "cuda" else False,
         persistent_workers=True,
     )
 
-    val_dataset = MemmapDataset(
-        os.path.join(args.data_dir, "val.bin"), args.sequence_length
+    val_dataset = create_dataset(
+        data_path=os.path.join(args.data_dir, "gpt2_test.bin"),
+        sequence_length=args.block_size,
+        shuffle_buffer_size=100_000,
     )
     val_loader = DataLoader(
         val_dataset,
         batch_size=args.batch_size,
-        num_workers=os.cpu_count() // 2,
+        num_workers=1,
         pin_memory=True if device == "cuda" else False,
         persistent_workers=True,
     )
@@ -105,7 +119,7 @@ def main(args):
         train_dataset,
         batch_size=args.batch_size,
         shuffle=False,
-        num_workers=os.cpu_count() // 2,
+        num_workers=1,
         pin_memory=True if device == "cuda" else False,
         persistent_workers=True,
     )
@@ -144,7 +158,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--data-dir",
         type=str,
-        default="./tinystories_data",
+        default="../data/fineweb_1.25B",
         help="Directory with train.bin and val.bin.",
     )
 

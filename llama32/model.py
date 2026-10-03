@@ -52,18 +52,21 @@ class LLama3_xs(nn.Module):
             dtype=cfg.dtype,
         )
 
-        self.freq_cis = compute_rope_params(
-            dim=cfg.head_dim,
-            context_length=cfg.max_sequence_length,
-            theta_base=cfg.rope_theta,
-        )
-
         self.norm = RMSNorm(embedding_dim=cfg.embedding_dim, eps=cfg.norm_eps)
         self.blocks = nn.ModuleList([Block(i, cfg) for i in range(cfg.num_blocks)])
 
         self.out_head = nn.Linear(
             cfg.embedding_dim, cfg.vocab_size, bias=False, dtype=cfg.dtype
         )
+
+        cos, sin = compute_rope_params(
+            dim=cfg.head_dim,
+            context_length=cfg.max_sequence_length,
+            theta_base=cfg.rope_theta,
+        )
+
+        self.register_buffer("cos", cos, persistent=False)
+        self.register_buffer("sin", sin, persistent=False)
 
         self.gradient_checkpointing = False
 
@@ -143,11 +146,11 @@ class LLama3_xs(nn.Module):
     ) -> tuple[torch.Tensor, torch.Tensor | None]:
         B, seqlen = x.shape
         h = self.embedding(x)
-        cos, sin = self.freq_cis
-        cos, sin = cos.to(h.device), sin.to(h.device)
+        # cos, sin = self.freq_cis
+        cos, sin = self.cos.to(h.device), self.sin.to(h.device)
         freq_cis = (
-            cos[start_pos : start_pos + seqlen],
-            sin[start_pos : start_pos + seqlen],
+            cos[start_pos : start_pos + seqlen],  # type: ignore
+            sin[start_pos : start_pos + seqlen],  # type: ignore
         )
 
         mask = None
@@ -162,7 +165,7 @@ class LLama3_xs(nn.Module):
             h = block(h, freq_cis, start_pos, mask)
 
         h = self.norm(h)
-        logits = self.out_head(h).float()
+        logits = self.out_head(h)
 
         loss = None
         if targets is not None:

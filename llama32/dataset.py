@@ -44,10 +44,11 @@ def token_stream(
             np.int64, copy=True
         )
 
-        yield {
-            "x": x,
-            "targets": targets,
-        }
+        #yield {
+        #    "x": x,
+        #    "targets": targets,
+        #}
+        yield x, targets
 
 
 def create_dataset(

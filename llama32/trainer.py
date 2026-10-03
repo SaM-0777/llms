@@ -88,6 +88,8 @@ class Trainer:
             with self.ctx:
                 _, loss = self.model(x=inputs, targets=targets)
                 loss = loss / self.args.gradient_accumulation_steps
+                current_loss = loss.item() * self.args.gradient_accumulation_steps
+                current_perplexity = math.exp(current_loss)
 
             self.scaler.scale(loss).backward()
 
@@ -115,6 +117,11 @@ class Trainer:
                 self.writer.add_scalar(
                     "Train/loss",
                     current_loss,
+                    self.optimizer_step,
+                )
+                self.writer.add_scalar(
+                    "Train/perplexity",
+                    current_perplexity,
                     self.optimizer_step,
                 )
                 self.writer.add_scalar(
@@ -154,11 +161,12 @@ class Trainer:
             if (iter_num + 1) % self.args.eval_intervals == 0 and iter_num != 0:
                 metrics = self.evaluate_model()
 
-                print(
-                    f"\nIteration {iter_num + 1}: "
-                    f"val_loss {metrics['val_loss']:.4f}, "
-                    f"val_perplexity {metrics['val_perplexity']:.4f}, "
-                    f"val_accuracy {metrics['val_accuracy']:.4f}"
+                pbar.set_postfix(
+                    loss=f"{current_loss:.4f}",
+                    ppl=f"{current_perplexity:.2f}",
+                    val_loss=f"{metrics['val_loss']:.4f}",
+                    val_ppl=f"{metrics['val_perplexity']:.2f}",
+                    val_acc=f"{metrics['val_accuracy']:.4f}",
                 )
 
                 for key, value in metrics.items():
