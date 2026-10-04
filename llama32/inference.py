@@ -2,10 +2,17 @@ from pathlib import Path
 
 import torch
 import warnings
+import tiktoken
 
 from .model import LLama3_xs
-from .tokenizer import load_tokenizer
+
+# from .tokenizer import load_tokenizer
 from .config import ModelConfig
+
+
+def load_gpt2_tokenizer():
+    get2_tokenizer = tiktoken.get_encoding("gpt2")
+    return get2_tokenizer
 
 
 def generate(
@@ -41,10 +48,10 @@ if __name__ == "__main__":
         warnings.warn(f"Using CPU...")
         device = "cpu"
 
-    tokenizer = load_tokenizer("Qwen/Qwen3.8-27B")
-    vocab_size = tokenizer.vocab_size
+    tokenizer = load_gpt2_tokenizer()
+    vocab_size = tokenizer.n_vocab
 
-    checkpoint_path = Path("checkpoints/llama32_best_model_20260926_1527@190000.pt")
+    checkpoint_path = Path("checkpoints/Llama32_180M.pt")
 
     cfg = ModelConfig()
     cfg.vocab_size = vocab_size
@@ -66,22 +73,26 @@ if __name__ == "__main__":
     model.to(device)
     model.to(dtype=dtype)
     model.eval()
-    
+
     total_params = sum(p.numel() for p in model.parameters())
     print(f"Total parameters: {total_params:,}")
     print(f"Model size: {total_params / 1e6:.2f}M parameters")
 
-    text = "Amazon.com (AMZN) will have a difficult time meeting analyst expectations this quarter given "
-    tokenized = tokenizer(
-        text,
-        add_special_tokens=False,
-        return_attention_mask=False,
-        return_token_type_ids=False,
-    )
-    token_ids = tokenized["input_ids"]
+    texts = [
+        "Once upon a time there was a pumpkin.",
+        "A little girl went to the woods",
+        "A boy told his sister a bedtime story about a flying cat",
+        "The kids sat in a circle while Uncle narrated a story about a brave knight",
+        "Dad was telling the kids an adventure tale about a pirate ship",
+    ]
+    for i, text in enumerate(texts):
+        print(f"{i + 1:2d} input sentence {i}")
+        tokenized = tokenizer.encode_ordinary(
+            text,
+        )
+        token_ids = tokenized
+        y = generate(token_ids, model, device, eos_id=tokenizer.eot_token)
+        generated = tokenizer.decode(y.squeeze().tolist())
 
-    y = generate(token_ids, model, device, eos_id=tokenizer.eos_token_id)
-    generated = tokenizer.decode(y.squeeze().tolist())
-
-    print(generated)
-    print(f"\n{'-' * 64}\n")
+        print(generated)
+        print(f"\n{'-' * 64}\n")

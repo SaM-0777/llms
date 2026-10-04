@@ -36,7 +36,7 @@ if __name__ == "__main__":
         "--model-path",
         nargs="?",
         type=str,
-        default="./models/best_model_params_01.pt",
+        default="../checkpoints/gemma_best_model_20260922_0559@128500.pt",
         help="Path to the saved model parameters (.pt file). Defaults to './models/best_model_params_01.pt'.",
     )
     parser.add_argument(
