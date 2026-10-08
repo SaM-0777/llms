@@ -1,0 +1,19 @@
+{
+  "samples": 50000,
+  "total_tokens": 24309796,
+  "total_bytes": 85384423,
+  "total_chars": 85297327,
+  "avg_tokens_per_sample": 486.19592,
+  "tokens_per_byte": 0.2847099640176757,
+  "bytes_per_token": 3.5123463397224723,
+  "chars_per_token": 3.5087635864982167,
+  "avg_sequence_length": 486.19592,
+  "p50_sequence_length": 429.0,
+  "p90_sequence_length": 763.0,
+  "p95_sequence_length": 925.0,
+  "p99_sequence_length": 1346.0,
+  "max_sequence_length": 2685,
+  "samples_per_sec": 675.1673493328796,
+  "tokens_per_sec": 328263.61056286073,
+  "elapsed_seconds": 74.05571381584741
+}

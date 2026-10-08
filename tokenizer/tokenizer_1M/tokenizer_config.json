@@ -1,0 +1,10 @@
+{
+  "add_prefix_space": false,
+  "clean_up_tokenization_spaces": false,
+  "model_max_length": 4096,
+  "tokenizer_class": "Qwen38Tokenizer",
+  "bos_token": null,
+  "eos_token": "<|endoftext|>",
+  "unk_token": null,
+  "pad_token": null
+}
