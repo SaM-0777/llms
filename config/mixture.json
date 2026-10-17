@@ -1,0 +1,223 @@
+{
+  "name": "locked-200b-english-pretraining-mixture",
+  "total_tokens": 200000000000,
+  "categories": [
+    {
+      "name": "source_code_and_repositories",
+      "share": 45,
+      "target_tokens": 90000000000,
+      "sources": [
+        {
+          "id": "nemotron_code_v2_metadata",
+          "type": "hf_metadata",
+          "repo": "nvidia/Nemotron-Pretraining-Code-v2",
+          "config": "Nemotron-Code-Metadata",
+          "split": "train",
+          "metadata_fields": ["commit_id", "rel_path", "language"],
+          "resolver_required": true
+        },
+        {
+          "id": "nemotron_code_v3_metadata",
+          "type": "hf_metadata",
+          "repo": "nvidia/Nemotron-Pretraining-Code-v3",
+          "config": "Nemotron-Code-Metadata",
+          "split": "train",
+          "metadata_fields": ["commit_id", "rel_path", "language"],
+          "resolver_required": true
+        }
+      ]
+    },
+    {
+      "name": "code_documentation_and_technical_tutorials",
+      "share": 15,
+      "target_tokens": 30000000000,
+      "sources": [
+        {
+          "id": "code_v2_synthetic_question_answering",
+          "repo": "nvidia/Nemotron-Pretraining-Code-v2",
+          "config": "Synthetic-Question-Answering",
+          "split": "train",
+          "field": "content",
+          "weight": 3
+        },
+        {
+          "id": "code_v2_synthetic_code_review",
+          "repo": "nvidia/Nemotron-Pretraining-Code-v2",
+          "config": "Synthetic-Code-Review",
+          "split": "train",
+          "field": "content",
+          "weight": 3
+        },
+        {
+          "id": "code_v2_synthetic_student_teacher",
+          "repo": "nvidia/Nemotron-Pretraining-Code-v2",
+          "config": "Synthetic-Student-Teacher",
+          "split": "train",
+          "field": "content",
+          "weight": 2
+        },
+        {
+          "id": "code_v2_synthetic_rewriting",
+          "repo": "nvidia/Nemotron-Pretraining-Code-v2",
+          "config": "Synthetic-Rewriting",
+          "split": "train",
+          "field": "content",
+          "weight": 1
+        },
+        {
+          "id": "code_v2_synthetic_transpilation",
+          "repo": "nvidia/Nemotron-Pretraining-Code-v2",
+          "config": "Synthetic-Transpilation",
+          "split": "train",
+          "field": "content",
+          "weight": 1
+        },
+        {
+          "id": "ultra_fineweb_technical_en",
+          "repo": "openbmb/Ultra-FineWeb",
+          "config": "default",
+          "split": "en",
+          "field": "content",
+          "weight": 2,
+          "filters": {
+            "min_chars": 500,
+            "contains_any": [
+              "programming",
+              "software",
+              "developer",
+              "code",
+              "api",
+              "tutorial",
+              "documentation",
+              "python",
+              "javascript",
+              "database"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "general_english_and_high_quality_prose",
+      "share": 10,
+      "target_tokens": 20000000000,
+      "sources": [
+        {
+          "id": "ultra_fineweb_general_en",
+          "repo": "openbmb/Ultra-FineWeb",
+          "config": "default",
+          "split": "en",
+          "field": "content",
+          "repeat": true
+        }
+      ]
+    },
+    {
+      "name": "conversational_assistant_and_persona_conditioned_data",
+      "share": 5,
+      "target_tokens": 10000000000,
+      "sources": [
+        {
+          "id": "nemotron_personas_usa",
+          "repo": "nvidia/Nemotron-Personas-USA",
+          "config": "default",
+          "split": "train",
+          "formatter": "persona",
+          "fields": [
+            "persona",
+            "professional_persona",
+            "sports_persona",
+            "arts_persona",
+            "travel_persona",
+            "culinary_persona",
+            "cultural_background",
+            "skills_and_expertise",
+            "hobbies_and_interests",
+            "career_goals_and_ambitions"
+          ],
+          "repeat": true
+        }
+      ]
+    },
+    {
+      "name": "mathematics_and_formal_technical_content",
+      "share": 10,
+      "target_tokens": 20000000000,
+      "sources": [
+        {
+          "id": "nemotron_math_textbooks",
+          "repo": "nvidia/Nemotron-Pretraining-Specialized-v1",
+          "config": "Nemotron-Pretraining-Math-Textbooks",
+          "split": "train",
+          "field": "text",
+          "repeat": true
+        }
+      ]
+    },
+    {
+      "name": "science_and_scientific_programming",
+      "share": 7,
+      "target_tokens": 14000000000,
+      "sources": [
+        {
+          "id": "nemotron_scientific_coding",
+          "repo": "nvidia/Nemotron-Pretraining-Specialized-v1",
+          "config": "Nemotron-Pretraining-Scientific-Coding",
+          "split": "train",
+          "field": "text",
+          "repeat": true
+        }
+      ]
+    },
+    {
+      "name": "reasoning_oriented_and_factual_material",
+      "share": 5,
+      "target_tokens": 10000000000,
+      "sources": [
+        {
+          "id": "nemotron_infini_byte_reasoning",
+          "repo": "nvidia/Nemotron-Pretraining-Specialized-v1",
+          "config": "Nemotron-Pretraining-InfiniByte-Reasoning",
+          "split": "train",
+          "field": "text",
+          "weight": 2,
+          "repeat": true
+        },
+        {
+          "id": "nemotron_rqa",
+          "repo": "nvidia/Nemotron-Pretraining-Specialized-v1",
+          "config": "Nemotron-Pretraining-RQA",
+          "split": "train",
+          "field": "text",
+          "weight": 1,
+          "repeat": true
+        }
+      ]
+    },
+    {
+      "name": "philosophy",
+      "share": 3,
+      "target_tokens": 6000000000,
+      "sources": [
+        {
+          "id": "lisa_megawatts_philosophy_corpus",
+          "repo": "LisaMegaWatts/philosophy-corpus",
+          "config": "default",
+          "split": "train",
+          "field": "text",
+          "repeat": true,
+          "weight": 2
+        },
+        {
+          "id": "yjkim27_philosophy_data_project",
+          "repo": "yjkim27/The-Philosophy-Data-Project",
+          "config": "default",
+          "split": "train",
+          "field": "sentence_str",
+          "repeat": true,
+          "weight": 1
+        }
+      ]
+    }
+  ]
+}
