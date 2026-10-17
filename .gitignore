@@ -15,6 +15,7 @@ wheels/
 *.pt
 
 data/
+extras/
 runs/
 wandb/
 checkpoints/
