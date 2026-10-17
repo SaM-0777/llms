@@ -3,27 +3,16 @@
   "total_tokens": 200000000000,
   "categories": [
     {
-      "name": "source_code_and_repositories",
+      "name": "source_code_and_code_corpora",
       "share": 45,
       "target_tokens": 90000000000,
       "sources": [
         {
-          "id": "nemotron_code_v2_metadata",
-          "type": "hf_metadata",
-          "repo": "nvidia/Nemotron-Pretraining-Code-v2",
-          "config": "Nemotron-Code-Metadata",
+          "id": "nemotron_cc_code_v1",
+          "repo": "nvidia/Nemotron-CC-Code-v1",
+          "config": "data",
           "split": "train",
-          "metadata_fields": ["commit_id", "rel_path", "language"],
-          "resolver_required": true
-        },
-        {
-          "id": "nemotron_code_v3_metadata",
-          "type": "hf_metadata",
-          "repo": "nvidia/Nemotron-Pretraining-Code-v3",
-          "config": "Nemotron-Code-Metadata",
-          "split": "train",
-          "metadata_fields": ["commit_id", "rel_path", "language"],
-          "resolver_required": true
+          "field": "text"
         }
       ]
     },
@@ -37,6 +26,7 @@
           "repo": "nvidia/Nemotron-Pretraining-Code-v2",
           "config": "Synthetic-Question-Answering",
           "split": "train",
+          "formatter": "field",
           "field": "content",
           "weight": 3
         },
@@ -45,6 +35,7 @@
           "repo": "nvidia/Nemotron-Pretraining-Code-v2",
           "config": "Synthetic-Code-Review",
           "split": "train",
+          "formatter": "field",
           "field": "content",
           "weight": 3
         },
@@ -53,6 +44,7 @@
           "repo": "nvidia/Nemotron-Pretraining-Code-v2",
           "config": "Synthetic-Student-Teacher",
           "split": "train",
+          "formatter": "field",
           "field": "content",
           "weight": 2
         },
@@ -61,6 +53,7 @@
           "repo": "nvidia/Nemotron-Pretraining-Code-v2",
           "config": "Synthetic-Rewriting",
           "split": "train",
+          "formatter": "field",
           "field": "content",
           "weight": 1
         },
@@ -69,31 +62,9 @@
           "repo": "nvidia/Nemotron-Pretraining-Code-v2",
           "config": "Synthetic-Transpilation",
           "split": "train",
+          "formatter": "field",
           "field": "content",
           "weight": 1
-        },
-        {
-          "id": "ultra_fineweb_technical_en",
-          "repo": "openbmb/Ultra-FineWeb",
-          "config": "default",
-          "split": "en",
-          "field": "content",
-          "weight": 2,
-          "filters": {
-            "min_chars": 500,
-            "contains_any": [
-              "programming",
-              "software",
-              "developer",
-              "code",
-              "api",
-              "tutorial",
-              "documentation",
-              "python",
-              "javascript",
-              "database"
-            ]
-          }
         }
       ]
     },
@@ -108,7 +79,7 @@
           "config": "default",
           "split": "en",
           "field": "content",
-          "repeat": true
+          "repeat": false
         }
       ]
     },
@@ -135,7 +106,7 @@
             "hobbies_and_interests",
             "career_goals_and_ambitions"
           ],
-          "repeat": true
+          "repeat": false
         }
       ]
     },
@@ -150,7 +121,7 @@
           "config": "Nemotron-Pretraining-Math-Textbooks",
           "split": "train",
           "field": "text",
-          "repeat": true
+          "repeat": false
         }
       ]
     },
@@ -165,7 +136,7 @@
           "config": "Nemotron-Pretraining-Scientific-Coding",
           "split": "train",
           "field": "text",
-          "repeat": true
+          "repeat": false
         }
       ]
     },
@@ -181,7 +152,7 @@
           "split": "train",
           "field": "text",
           "weight": 2,
-          "repeat": true
+          "repeat": false
         },
         {
           "id": "nemotron_rqa",
@@ -190,7 +161,7 @@
           "split": "train",
           "field": "text",
           "weight": 1,
-          "repeat": true
+          "repeat": false
         }
       ]
     },
@@ -205,7 +176,7 @@
           "config": "default",
           "split": "train",
           "field": "text",
-          "repeat": true,
+          "repeat": false,
           "weight": 2
         },
         {
@@ -214,7 +185,7 @@
           "config": "default",
           "split": "train",
           "field": "sentence_str",
-          "repeat": true,
+          "repeat": false,
           "weight": 1
         }
       ]
