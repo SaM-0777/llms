@@ -619,7 +619,10 @@ def main(args: Config):
 
     if args.validate:
         data_repo.validate()
-
+        return 
+    
+    summary = data_repo.stream_and_upload()
+    print(json.dumps(summary, indent=2))
 
 if __name__ == "__main__":
     args = tyro.cli(Config)
