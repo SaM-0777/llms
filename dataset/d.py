@@ -279,6 +279,37 @@ class ShardWriter(MegatronDocumentTokenizer):
             }
 
 
+def get_tokenizer_name(tokenizer_path: str) -> str:
+    normalized = str(tokenizer_path).replace("\\", "/").rstrip("/")
+    if normalized.endswith("/tokenizer.json"):
+        normalized = normalized[: -len("/tokenizer.json")]
+    parts = [part for part in normalized.split("/") if part]
+    if "tokenizer" in parts:
+        return "/".join(parts[parts.index("tokenizer") :])
+    return parts[-1] if parts else "tokenizer"
+
+
+class Executor(LocalPipelineExecutor):
+    def __init__(self, *, executor_metadata: Mapping[str, Any], **kwargs):
+        super().__init__(**kwargs)
+        self.executor_metadata = dict(executor_metadata)
+
+    def save_executor_as_json(self, indent: int = 4):
+        payload = {
+            **self.executor_metadata,
+            "executor": "LocalPipelineExecutor",
+            "skip_completed": self.skip_completed,
+            "tasks": self.tasks,
+            "workers": self.workers,
+            "start_method": self.start_method,
+            "local_tasks": self.local_tasks,
+            "local_rank_offset": self.local_rank_offset,
+            "world_size": self.world_size,
+        }
+        with self.logging_dir.open("executor.json", "w") as handle:
+            json.dump(payload, handle, indent=indent, sort_keys=True)
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
 
@@ -452,12 +483,13 @@ def run(args):
     tokenizer = load_tokenizer(args.tokenizer)
     vocab_size = tokenizer.vocab_size
     eos_token = tokenizer.eos_token
-    tokenizer_json = Path(args.tokenizer).expanduser() / "tokenizer.json"
+    tokenizer_json = Path(args.tokenizer) / "tokenizer.json"
     if not tokenizer_json.is_file():
         raise FileNotFoundError(
             f"DataTrove requires the local tokenizer.json: {tokenizer_json}"
         )
     tokenizer_json = tokenizer_json.resolve()
+    tokenizer_name = get_tokenizer_name(args.tokenizer)
 
     dtype = "uint16"
     if vocab_size > 2**16:
@@ -489,7 +521,7 @@ def run(args):
     }
     checkpoint_metadata = {
         "repo_id": repo_id,
-        "tokenizer": str(tokenizer_json),
+        "tokenizer": tokenizer_name,
         "eos_token": eos_token,
         "budget_plan": budget_plan,
     }
@@ -509,7 +541,7 @@ def run(args):
         results = {
             "run_id": run_id,
             "repo_id": repo_id,
-            "tokenizer": str(tokenizer_json),
+            "tokenizer": tokenizer_name,
             "eos_token": eos_token,
             "resources": resources,
             "budget_plan": budget_plan,
@@ -552,6 +584,34 @@ def run(args):
                 ]
 
                 log_dir = f"hf://datasets/{repo_id}/logs/{run_id}/{source_id}"
+                executor_metadata = {
+                    "run_id": run_id,
+                    "source_id": source_id,
+                    "pipeline": [
+                        {
+                            "type": "HuggingFaceDatasetReader",
+                            "dataset": source["dataset"],
+                            "dataset_options": dict(source["dataset_options"]),
+                            "cache_dir": "hf-stream-cache",
+                            "streaming": True,
+                            "batch_size": 1000,
+                            "text_key": source["text_key"],
+                            "id_key": "id",
+                        },
+                        {
+                            "type": "ShardWriter",
+                            "tokenizer": tokenizer_name,
+                            "eos_token": eos_token,
+                            "output_folder": f"hf://datasets/{repo_id}",
+                            "save_filename": source_id,
+                            "batch_size": resources["batch_size"],
+                            "target_tokens": target_tokens,
+                            "max_tokens_per_shard": resources["tokens_per_shard"],
+                            "cache_path": "hf-stream-cache",
+                        },
+                    ],
+                    "logging_dir": log_dir,
+                }
                 LOG.info(
                     "source=%s dataset=%s target_tokens=%s tasks=%d workers=%d output=root",
                     source_id,
@@ -561,7 +621,8 @@ def run(args):
                     resources["workers"],
                 )
 
-                LocalPipelineExecutor(
+                Executor(
+                    executor_metadata=executor_metadata,
                     pipeline=pipeline,
                     logging_dir=str(log_dir),
                     tasks=resources["tasks"],
