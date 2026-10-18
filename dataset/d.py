@@ -583,7 +583,7 @@ def run(args):
                     writer,
                 ]
 
-                log_dir = f"hf://datasets/{repo_id}/logs/{run_id}/{source_id}"
+                log_dir = f"hf://datasets/{repo_id}/logs/{source_id}"
                 executor_metadata = {
                     "run_id": run_id,
                     "source_id": source_id,
