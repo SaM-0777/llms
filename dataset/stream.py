@@ -27,7 +27,7 @@ class Config:
     """Path to the local tokenizer."""
     repo: str = "SamLegion888/SWE_3.5_S"
     """Hugging Face dataset repository in Username/repo_name format."""
-    shard_tokens: int = 10_000_000_000
+    shard_tokens: int = 2000000000 # 8GB shard size
     """Target number of tokens per shard."""
     num_workers: int = os.cpu_count() or 4
     """Number of workers to process data"""
@@ -461,6 +461,7 @@ class DataRepo:
                 if self.state["source_tokens_processed"] >= target:
                     self._finalize_shard()
                     self._advance_source()
+                    print("Here")
                     continue
 
                 kwargs = {
@@ -486,7 +487,6 @@ class DataRepo:
                 exhausted = False
                 source_done = False
 
-                rows = []
                 while not source_done:
                     rows = []
                     for _ in range(self.num_workers):
@@ -499,34 +499,40 @@ class DataRepo:
                     if not rows:
                         break
 
-                texts = [self._format_row(row, source) for row in rows]
-                encoded_rows = list(self.token_executor.map(self._encode_text, texts))
-
-                for text, token_ids in zip(texts, encoded_rows):
-                    if self.state["source_tokens_processed"] >= target:
-                        source_done = True
-                        break
-
-                    self._write_row(token_ids, text, category, source)
-                    progress.update(len(token_ids))
-                    progress.set_postfix(
-                        shards_pushed=len(self.state["uploaded_shards"])
+                    texts = [self._format_row(row, source) for row in rows]
+                    encoded_rows = list(
+                        self.token_executor.map(self._encode_text, texts)
                     )
-                    self._harvest_upload()
 
-                    if self.state["source_rows_processed"] % 1000 == 0:
-                        self._checkpoint()
+                    for text, token_ids in zip(texts, encoded_rows):
+                        if self.state["source_tokens_processed"] >= target:
+                            source_done = True
+                            break
 
-                    shard = self.state["current_shard"]
-                    if shard and shard["tokens"] >= self.shard_tokens:
-                        self._finalize_shard()
+                        self._write_row(token_ids, text, category, source)
+                        progress.update(len(token_ids))
+                        progress.set_postfix(
+                            shards_pushed=len(self.state["uploaded_shards"])
+                        )
+                        self._harvest_upload()
 
-                    if self.state["source_tokens_processed"] >= target:
-                        source_done = True
+                        if self.state["source_rows_processed"] % 1000 == 0:
+                            self._checkpoint()
+
+                        shard = self.state["current_shard"]
+                        if shard and shard["tokens"] >= self.shard_tokens:
+                            self._finalize_shard()
+
+                        if self.state["source_tokens_processed"] >= target:
+                            source_done = True
+                            break
+
+                    if exhausted:
                         break
-
-                if exhausted:
-                    break
+                
+                self._finalize_shard()
+                self._wait_for_upload()
+                self._advance_source()
 
         self._wait_for_upload()
         self.state["complete"] = True
@@ -619,10 +625,11 @@ def main(args: Config):
 
     if args.validate:
         data_repo.validate()
-        return 
-    
+        return
+
     summary = data_repo.stream_and_upload()
     print(json.dumps(summary, indent=2))
+
 
 if __name__ == "__main__":
     args = tyro.cli(Config)
