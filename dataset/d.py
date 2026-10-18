@@ -285,11 +285,13 @@ def parse_args():
     parser.add_argument(
         "--total-tokens",
         type=int,
+        required=True,
         help="Total token budget",
     )
     parser.add_argument(
         "--repo-id",
         type=str,
+        required=True,
         help="Huggingface repo_id",
     )
     parser.add_argument(
@@ -464,6 +466,15 @@ def run(args):
     tokens_per_shard = calculate_tokens_per_shard(shard_size, dtype=dtype)
 
     api = HfApi()
+    try:
+        identity = api.whoami()
+    except Exception as exc:
+        raise RuntimeError(
+            "Hugging Face authentication is required. "
+            "Run hf auth login or set HF_TOKEN, then run this script again."
+        ) from exc
+
+    LOG.info("authenticated with Hugging Face as %s", identity.get("name", "unknown"))
     api.create_repo(repo_id=repo_id, repo_type="dataset", exist_ok=True)
 
     num_tasks = max(1, args.num_tasks)
