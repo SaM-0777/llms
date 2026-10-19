@@ -5,6 +5,7 @@
       "name": "data",
       "split": "train"
     },
+    "estimated_tokens": 100000000000,
     "text_key": "text",
     "ratio": 0.45
   },
@@ -14,6 +15,7 @@
       "name": "Synthetic-Question-Answering",
       "split": "train"
     },
+    "estimated_tokens": 100000000000,
     "text_key": "content",
     "ratio": 0.045
   },
@@ -23,6 +25,7 @@
       "name": "Synthetic-Code-Review",
       "split": "train"
     },
+    "estimated_tokens": 100000000000,
     "text_key": "content",
     "ratio": 0.045
   },
@@ -32,6 +35,7 @@
       "name": "Synthetic-Student-Teacher",
       "split": "train"
     },
+    "estimated_tokens": 100000000000,
     "text_key": "content",
     "ratio": 0.03
   },
@@ -41,6 +45,7 @@
       "name": "Synthetic-Rewriting",
       "split": "train"
     },
+    "estimated_tokens": 100000000000,
     "text_key": "content",
     "ratio": 0.015
   },
@@ -50,6 +55,7 @@
       "name": "Synthetic-Transpilation",
       "split": "train"
     },
+    "estimated_tokens": 100000000000,
     "text_key": "content",
     "ratio": 0.015
   },
@@ -59,6 +65,7 @@
       "name": "default",
       "split": "en"
     },
+    "estimated_tokens": 100000000000,
     "text_key": "content",
     "ratio": 0.15
   },
@@ -68,6 +75,7 @@
       "name": "Nemotron-Pretraining-Math-Textbooks",
       "split": "train"
     },
+    "estimated_tokens": 100000000000,
     "text_key": "text",
     "ratio": 0.10
   },
@@ -77,6 +85,7 @@
       "name": "Nemotron-Pretraining-Scientific-Coding",
       "split": "train"
     },
+    "estimated_tokens": 100000000000,
     "text_key": "text",
     "ratio": 0.07
   },
@@ -86,6 +95,7 @@
       "name": "Nemotron-Pretraining-InfiniByte-Reasoning",
       "split": "train"
     },
+    "estimated_tokens": 100000000000,
     "text_key": "text",
     "ratio": 0.033
   },
@@ -95,6 +105,7 @@
       "name": "Nemotron-Pretraining-RQA",
       "split": "train"
     },
+    "estimated_tokens": 100000000000,
     "text_key": "text",
     "ratio": 0.0167
   },
@@ -104,6 +115,7 @@
       "name": "default",
       "split": "train"
     },
+    "estimated_tokens": 100000000000,
     "text_key": "sentence_str",
     "ratio": 0.02
   },
@@ -113,6 +125,7 @@
       "name": "default",
       "split": "train"
     },
+    "estimated_tokens": 100000000000,
     "text_key": "text",
     "ratio": 0.01
   }

@@ -243,13 +243,13 @@ def parse_args():
     parser.add_argument(
         "--batch-size",
         type=int,
-        default=4096,
+        default=1000,
         help="Documents per tokenization batch.",
     )
     parser.add_argument(
         "--shard-size",
         type=int,
-        default=2048,  # 2GB
+        default=512,  # 512 MiB
         help="Shard size in MiB.",
     )
     return parser.parse_args()
