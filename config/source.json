@@ -1,0 +1,119 @@
+{
+  "nemotron_cc_code_v1": {
+    "dataset": "nvidia/Nemotron-CC-Code-v1",
+    "dataset_options": {
+      "name": "data",
+      "split": "train"
+    },
+    "text_key": "text",
+    "ratio": 0.45
+  },
+  "code_v2_synthetic_question_answering": {
+    "dataset": "nvidia/Nemotron-Pretraining-Code-v2",
+    "dataset_options": {
+      "name": "Synthetic-Question-Answering",
+      "split": "train"
+    },
+    "text_key": "content",
+    "ratio": 0.045
+  },
+  "code_v2_synthetic_code_review": {
+    "dataset": "nvidia/Nemotron-Pretraining-Code-v2",
+    "dataset_options": {
+      "name": "Synthetic-Code-Review",
+      "split": "train"
+    },
+    "text_key": "content",
+    "ratio": 0.045
+  },
+  "code_v2_synthetic_student_teacher": {
+    "dataset": "nvidia/Nemotron-Pretraining-Code-v2",
+    "dataset_options": {
+      "name": "Synthetic-Student-Teacher",
+      "split": "train"
+    },
+    "text_key": "content",
+    "ratio": 0.03
+  },
+  "code_v2_synthetic_rewriting": {
+    "dataset": "nvidia/Nemotron-Pretraining-Code-v2",
+    "dataset_options": {
+      "name": "Synthetic-Rewriting",
+      "split": "train"
+    },
+    "text_key": "content",
+    "ratio": 0.015
+  },
+  "code_v2_synthetic_transpilation": {
+    "dataset": "nvidia/Nemotron-Pretraining-Code-v2",
+    "dataset_options": {
+      "name": "Synthetic-Transpilation",
+      "split": "train"
+    },
+    "text_key": "content",
+    "ratio": 0.015
+  },
+  "ultra_fineweb_general_en": {
+    "dataset": "openbmb/Ultra-FineWeb",
+    "dataset_options": {
+      "name": "default",
+      "split": "en"
+    },
+    "text_key": "content",
+    "ratio": 0.15
+  },
+  "nemotron_math_textbooks": {
+    "dataset": "nvidia/Nemotron-Pretraining-Specialized-v1",
+    "dataset_options": {
+      "name": "Nemotron-Pretraining-Math-Textbooks",
+      "split": "train"
+    },
+    "text_key": "text",
+    "ratio": 0.10
+  },
+  "nemotron_scientific_coding": {
+    "dataset": "nvidia/Nemotron-Pretraining-Specialized-v1",
+    "dataset_options": {
+      "name": "Nemotron-Pretraining-Scientific-Coding",
+      "split": "train"
+    },
+    "text_key": "text",
+    "ratio": 0.07
+  },
+  "nemotron_infini_byte_reasoning": {
+    "dataset": "nvidia/Nemotron-Pretraining-Specialized-v1",
+    "dataset_options": {
+      "name": "Nemotron-Pretraining-InfiniByte-Reasoning",
+      "split": "train"
+    },
+    "text_key": "text",
+    "ratio": 0.033
+  },
+  "nemotron_rqa": {
+    "dataset": "nvidia/Nemotron-Pretraining-Specialized-v1",
+    "dataset_options": {
+      "name": "Nemotron-Pretraining-RQA",
+      "split": "train"
+    },
+    "text_key": "text",
+    "ratio": 0.0167
+  },
+  "yjkim27_the_philosophy_data_project": {
+    "dataset": "yjkim27/The-Philosophy-Data-Project",
+    "dataset_options": {
+      "name": "default",
+      "split": "train"
+    },
+    "text_key": "sentence_str",
+    "ratio": 0.02
+  },
+  "LisaMegaWatts_philosophy_corpus": {
+    "dataset": "LisaMegaWatts/philosophy-corpus",
+    "dataset_options": {
+      "name": "default",
+      "split": "train"
+    },
+    "text_key": "text",
+    "ratio": 0.01
+  }
+}

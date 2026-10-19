@@ -30,114 +30,6 @@ CHECKPOINT_REPO_PATH = "metadata/checkpoint.json"
 CHECKPOINT_VERSION = 3
 MIN_LOCAL_FREE_BYTES = 8 * 1024**3
 
-SOURCES = {
-    "nemotron_cc_code_v1": {
-        "dataset": "nvidia/Nemotron-CC-Code-v1",
-        "dataset_options": {"name": "data", "split": "train"},
-        "text_key": "text",
-        "ratio": 0.45,  # 45%
-    },
-    "code_v2_synthetic_question_answering": {
-        "dataset": "nvidia/Nemotron-Pretraining-Code-v2",
-        "dataset_options": {
-            "name": "Synthetic-Question-Answering",
-            "split": "train",
-        },
-        "text_key": "content",
-        "ratio": 0.045,  # 4.5%
-    },
-    "code_v2_synthetic_code_review": {
-        "dataset": "nvidia/Nemotron-Pretraining-Code-v2",
-        "dataset_options": {
-            "name": "Synthetic-Code-Review",
-            "split": "train",
-        },
-        "text_key": "content",
-        "ratio": 0.045,  # 4.5%
-    },
-    "code_v2_synthetic_student_teacher": {
-        "dataset": "nvidia/Nemotron-Pretraining-Code-v2",
-        "dataset_options": {
-            "name": "Synthetic-Student-Teacher",
-            "split": "train",
-        },
-        "text_key": "content",
-        "ratio": 0.03,  # 3%
-    },
-    "code_v2_synthetic_rewriting": {
-        "dataset": "nvidia/Nemotron-Pretraining-Code-v2",
-        "dataset_options": {
-            "name": "Synthetic-Rewriting",
-            "split": "train",
-        },
-        "text_key": "content",
-        "ratio": 0.015,  # 1.5%
-    },
-    "code_v2_synthetic_transpilation": {
-        "dataset": "nvidia/Nemotron-Pretraining-Code-v2",
-        "dataset_options": {
-            "name": "Synthetic-Transpilation",
-            "split": "train",
-        },
-        "text_key": "content",
-        "ratio": 0.015,  # 1.5%
-    },
-    "ultra_fineweb_general_en": {
-        "dataset": "openbmb/Ultra-FineWeb",
-        "dataset_options": {"name": "default", "split": "en"},
-        "text_key": "content",
-        "ratio": 0.15,
-    },
-    "nemotron_math_textbooks": {
-        "dataset": "nvidia/Nemotron-Pretraining-Specialized-v1",
-        "dataset_options": {
-            "name": "Nemotron-Pretraining-Math-Textbooks",
-            "split": "train",
-        },
-        "text_key": "text",
-        "ratio": 0.10,
-    },
-    "nemotron_scientific_coding": {
-        "dataset": "nvidia/Nemotron-Pretraining-Specialized-v1",
-        "dataset_options": {
-            "name": "Nemotron-Pretraining-Scientific-Coding",
-            "split": "train",
-        },
-        "text_key": "text",
-        "ratio": 0.07,
-    },
-    "nemotron_infini_byte_reasoning": {
-        "dataset": "nvidia/Nemotron-Pretraining-Specialized-v1",
-        "dataset_options": {
-            "name": "Nemotron-Pretraining-InfiniByte-Reasoning",
-            "split": "train",
-        },
-        "text_key": "text",
-        "ratio": 0.033,
-    },
-    "nemotron_rqa": {
-        "dataset": "nvidia/Nemotron-Pretraining-Specialized-v1",
-        "dataset_options": {
-            "name": "Nemotron-Pretraining-RQA",
-            "split": "train",
-        },
-        "text_key": "text",
-        "ratio": 0.0167,
-    },
-    "yjkim27_the_philosophy_data_project": {
-        "dataset": "yjkim27/The-Philosophy-Data-Project",
-        "dataset_options": {"name": "default", "split": "train"},
-        "text_key": "sentence_str",
-        "ratio": 0.02,
-    },
-    "LisaMegaWatts_philosophy_corpus": {
-        "dataset": "LisaMegaWatts/philosophy-corpus",
-        "dataset_options": {"name": "default", "split": "train"},
-        "text_key": "text",
-        "ratio": 0.01,
-    },
-}
-
 
 class LocalStorageSafetyStop(RuntimeError):
     """Raised before local storage reaches the reserved safety margin."""
@@ -314,6 +206,12 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
+        "--sources",
+        type=str,
+        default="config/source.json",
+        help="Source json file",
+    )
+    parser.add_argument(
         "--total-tokens",
         type=int,
         required=True,
@@ -357,10 +255,20 @@ def parse_args():
     return parser.parse_args()
 
 
-def build_budget_plan(total_tokens: int):
+def get_sources(file: str | Path) -> dict[str, Any]:
+    file_path = Path(file)
+
+    if not file_path.exists():
+        raise FileNotFoundError("Sources json file path does not exists")
+
+    with file_path.open("r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def build_budget_plan(total_tokens: int, sources: dict):
     ratio_budgets = {
         source_id: int(int(total_tokens) * Decimal(str(source["ratio"])))
-        for source_id, source in SOURCES.items()
+        for source_id, source in sources.items()
     }
 
     return ratio_budgets
@@ -474,8 +382,9 @@ def dataset_reader(source_id: str, source: dict, cache_dir: Path):
 def run(args):
     repo_id = args.repo_id
     run_id = f"{repo_id}-v1"
+    sources = get_sources(args.sources)
     total_tokens = args.total_tokens * 1.005
-    budget_plan = build_budget_plan(total_tokens=total_tokens)
+    budget_plan = build_budget_plan(total_tokens=total_tokens, sources=sources)
     cpu_count = max(1, (os.cpu_count() or 2) // 2)
     batch_size = args.batch_size
     shard_size = args.shard_size
@@ -555,7 +464,7 @@ def run(args):
         with isolated_hf_cache(parallel_workers=resources["workers"]) as cache_dir:
             ensure_local_storage(cache_dir)
 
-            for source_id, source in SOURCES.items():
+            for source_id, source in sources.items():
                 if source_id in completed_sources:
                     continue
 
@@ -677,7 +586,7 @@ def run(args):
     )
     upload_json(api, repo_id, f"metadata/{run_id}.json", results)
     upload_json(
-        api, repo_id, "metadata/mixture.json", {"sources": SOURCES, **budget_plan}
+        api, repo_id, "metadata/mixture.json", {"sources": sources, **budget_plan}
     )
     LOG.info("realized_total_tokens=%s", f"{results['realized_total_tokens']:,}")
     return results
@@ -691,7 +600,7 @@ def main() -> int:
     )
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("httpcore").setLevel(logging.WARNING)
-    
+
     args = parse_args()
 
     try:
@@ -705,4 +614,4 @@ def main() -> int:
 if __name__ == "__main__":
     raise SystemExit(main())
 
-# python dataset/stream.py --repo-id "SamLegion888/SWE-test-001" --total-tokens 2000000 --batch-size 8192 --num-workers 32 --num-tasks 64
+# python dataset/stream.py --sources "config/source.json" --repo-id "SamLegion888/SWE-test-001" --total-tokens 2000000 --shard-size 512 --num-workers 1 --num-tasks 1
