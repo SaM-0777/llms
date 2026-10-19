@@ -21,11 +21,12 @@ except ModuleNotFoundError:
         serialized_pre_tokenizer,
     )
 
-MODEL_ID = "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4"
+#MODEL_ID = "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4"
+MODEL_ID = "Qwen/Qwen3.5-4B"
 
 DEFAULT_INPUT = Path("tokenizer/notation_lexicals_II.json")
 
-DEFAULT_OUTPUT = Path("tokenizer/NVIDIA-Nemotron-3-Super-120B-A12B-vocab-extended_II")
+DEFAULT_OUTPUT = Path("tokenizer/Qwen35-4B-vocab-extended")
 
 
 def load_unified_tokens(path: Path) -> list[str]:
