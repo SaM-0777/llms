@@ -40,7 +40,7 @@ def main() -> None:
     parser.add_argument("--total-tokens", type=int, default=200_000_000_000)
     parser.add_argument(
         "--tokenizer",
-        default="tokenizer/NVIDIA-Nemotron-3-Super-120B-A12B-vocab-extended",
+        default="tokenizer/NVIDIA-Nemotron-3-Super-120B-A12B-vocab-extended_II",
     )
     parser.add_argument("--num-tasks", type=int, default=250)
     parser.add_argument("--num-workers", type=int, default=16)

@@ -1,0 +1,171 @@
+{
+  "nemotron_cc_code_v1": {
+    "dataset": "nvidia/Nemotron-CC-Code-v1",
+    "dataset_options": {
+      "name": "data",
+      "split": "train"
+    },
+    "estimated_tokens": 508459431168,
+    "text_key": "text",
+    "ratio": 0.45,
+    "avg_tokens_per_doc": 2350.203105263158,
+    "sampled_docs": 19000,
+    "num_rows": 216347017
+  },
+  "code_v2_synthetic_question_answering": {
+    "dataset": "nvidia/Nemotron-Pretraining-Code-v2",
+    "dataset_options": {
+      "name": "Synthetic-Question-Answering",
+      "split": "train"
+    },
+    "estimated_tokens": 292805080840,
+    "text_key": "content",
+    "ratio": 0.045,
+    "avg_tokens_per_doc": 749.5135454545455,
+    "sampled_docs": 11000,
+    "num_rows": 390660159
+  },
+  "code_v2_synthetic_code_review": {
+    "dataset": "nvidia/Nemotron-Pretraining-Code-v2",
+    "dataset_options": {
+      "name": "Synthetic-Code-Review",
+      "split": "train"
+    },
+    "estimated_tokens": 99293712063,
+    "text_key": "content",
+    "ratio": 0.045,
+    "avg_tokens_per_doc": 1161.2363333333333,
+    "sampled_docs": 12000,
+    "num_rows": 85506894
+  },
+  "code_v2_synthetic_student_teacher": {
+    "dataset": "nvidia/Nemotron-Pretraining-Code-v2",
+    "dataset_options": {
+      "name": "Synthetic-Student-Teacher",
+      "split": "train"
+    },
+    "estimated_tokens": 30582463074,
+    "text_key": "content",
+    "ratio": 0.03,
+    "avg_tokens_per_doc": 680.6454615384615,
+    "sampled_docs": 13000,
+    "num_rows": 44931561
+  },
+  "code_v2_synthetic_rewriting": {
+    "dataset": "nvidia/Nemotron-Pretraining-Code-v2",
+    "dataset_options": {
+      "name": "Synthetic-Rewriting",
+      "split": "train"
+    },
+    "estimated_tokens": 97273841231,
+    "text_key": "content",
+    "ratio": 0.015,
+    "avg_tokens_per_doc": 973.7040833333333,
+    "sampled_docs": 12000,
+    "num_rows": 99900825
+  },
+  "code_v2_synthetic_transpilation": {
+    "dataset": "nvidia/Nemotron-Pretraining-Code-v2",
+    "dataset_options": {
+      "name": "Synthetic-Transpilation",
+      "split": "train"
+    },
+    "estimated_tokens": 38454615466,
+    "text_key": "content",
+    "ratio": 0.015,
+    "avg_tokens_per_doc": 1307.8946153846155,
+    "sampled_docs": 13000,
+    "num_rows": 29401922
+  },
+  "ultra_fineweb_general_en": {
+    "dataset": "openbmb/Ultra-FineWeb",
+    "dataset_options": {
+      "name": "default",
+      "split": "en"
+    },
+    "estimated_tokens": 1028297485125,
+    "text_key": "content",
+    "ratio": 0.15,
+    "avg_tokens_per_doc": 887.0330454545455,
+    "sampled_docs": 22000,
+    "num_rows": 1159254991
+  },
+  "nemotron_math_textbooks": {
+    "dataset": "nvidia/Nemotron-Pretraining-Specialized-v1",
+    "dataset_options": {
+      "name": "Nemotron-Pretraining-Math-Textbooks",
+      "split": "train"
+    },
+    "estimated_tokens": 30660901492,
+    "text_key": "text",
+    "ratio": 0.1,
+    "avg_tokens_per_doc": 2376.857,
+    "sampled_docs": 12000,
+    "num_rows": 12899767
+  },
+  "nemotron_scientific_coding": {
+    "dataset": "nvidia/Nemotron-Pretraining-Specialized-v1",
+    "dataset_options": {
+      "name": "Nemotron-Pretraining-Scientific-Coding",
+      "split": "train"
+    },
+    "estimated_tokens": 1481296386,
+    "text_key": "text",
+    "ratio": 0.07,
+    "avg_tokens_per_doc": 1635.0463333333332,
+    "sampled_docs": 12000,
+    "num_rows": 905966
+  },
+  "nemotron_infini_byte_reasoning": {
+    "dataset": "nvidia/Nemotron-Pretraining-Specialized-v1",
+    "dataset_options": {
+      "name": "Nemotron-Pretraining-InfiniByte-Reasoning",
+      "split": "train"
+    },
+    "estimated_tokens": 30497695418,
+    "text_key": "text",
+    "ratio": 0.033,
+    "avg_tokens_per_doc": 20630.233909090908,
+    "sampled_docs": 11000,
+    "num_rows": 1478301
+  },
+  "nemotron_rqa": {
+    "dataset": "nvidia/Nemotron-Pretraining-Specialized-v1",
+    "dataset_options": {
+      "name": "Nemotron-Pretraining-RQA",
+      "split": "train"
+    },
+    "estimated_tokens": 154659567454,
+    "text_key": "text",
+    "ratio": 0.0167,
+    "avg_tokens_per_doc": 8849.656833333333,
+    "sampled_docs": 12000,
+    "num_rows": 17476335
+  },
+  "yjkim27_the_philosophy_data_project": {
+    "dataset": "yjkim27/The-Philosophy-Data-Project",
+    "dataset_options": {
+      "name": "default",
+      "split": "train"
+    },
+    "estimated_tokens": 10261463,
+    "text_key": "sentence_str",
+    "ratio": 0.02,
+    "avg_tokens_per_doc": 25.884875,
+    "sampled_docs": 24000,
+    "num_rows": 396427
+  },
+  "LisaMegaWatts_philosophy_corpus": {
+    "dataset": "LisaMegaWatts/philosophy-corpus",
+    "dataset_options": {
+      "name": "default",
+      "split": "train"
+    },
+    "estimated_tokens": 556528902,
+    "text_key": "text",
+    "ratio": 0.01,
+    "avg_tokens_per_doc": 40.672916666666666,
+    "sampled_docs": 12000,
+    "num_rows": 13683034
+  }
+}

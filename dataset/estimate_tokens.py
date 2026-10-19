@@ -231,7 +231,7 @@ def main():
     )
     parser.add_argument(
         "--tokenizer",
-        default="tokenizer/NVIDIA-Nemotron-3-Super-120B-A12B-vocab-extended",
+        default="tokenizer/NVIDIA-Nemotron-3-Super-120B-A12B-vocab-extended_II",
     )
     parser.add_argument("--batch-size", type=int, default=1_000)
     parser.add_argument("--threshold", type=float, default=0.001)
