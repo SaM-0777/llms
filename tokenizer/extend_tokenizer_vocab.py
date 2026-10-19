@@ -23,9 +23,9 @@ except ModuleNotFoundError:
 
 MODEL_ID = "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4"
 
-DEFAULT_INPUT = Path("notation_lexicals.json")
+DEFAULT_INPUT = Path("tokenizer/notation_lexicals_II.json")
 
-DEFAULT_OUTPUT = Path("tokenizer/NVIDIA-Nemotron-3-Super-120B-A12B-vocab-extended")
+DEFAULT_OUTPUT = Path("tokenizer/NVIDIA-Nemotron-3-Super-120B-A12B-vocab-extended_II")
 
 
 def load_unified_tokens(path: Path) -> list[str]:

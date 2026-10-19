@@ -8,6 +8,7 @@ dependencies = [
     "accelerate>=1.15.0",
     "datasets>=5.0.1",
     "datatrove[io,processing]>=0.10.1",
+    "gigatoken>=0.10.0",
     "matplotlib>=3.11.2",
     "megatron-core>=0.19.2",
     "numpy>=2.5.3",

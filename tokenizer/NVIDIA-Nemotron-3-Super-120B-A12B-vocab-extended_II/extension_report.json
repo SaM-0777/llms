@@ -1,0 +1,2076 @@
+{
+  "base_model": "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4",
+  "input_json": "tokenizer/notation_lexicals_II.json",
+  "output_directory": "tokenizer/NVIDIA-Nemotron-3-Super-120B-A12B-vocab-extended_II",
+  "original_vocabulary_size": 131072,
+  "extended_vocabulary_size": 131581,
+  "lexical_strings_loaded": 990,
+  "strings_already_in_vocabulary": 481,
+  "new_tokens_added": 509,
+  "existing_token_ids_preserved": true,
+  "all_added_tokens_encode_as_single_token": true,
+  "lexical_matching": {
+    "strategy": "boundary-aware lexical split followed by the original pre-tokenizer",
+    "longest_match_first": true,
+    "lexical_regex_length": 6346,
+    "base_bpe_model_sha256": "38235f4eadb91b488cb34a43b21e76c9b2d612b5e6fe6aff6a213b2e81c417a4",
+    "extended_bpe_model_sha256": "38235f4eadb91b488cb34a43b21e76c9b2d612b5e6fe6aff6a213b2e81c417a4",
+    "original_pre_tokenizer": {
+      "type": "Sequence",
+      "pretokenizers": [
+        {
+          "type": "Split",
+          "pattern": {
+            "Regex": "[^\\r\\n\\p{L}\\p{N}]?[\\p{Lu}\\p{Lt}\\p{Lm}\\p{Lo}\\p{M}]*[\\p{Ll}\\p{Lm}\\p{Lo}\\p{M}]+|[^\\r\\n\\p{L}\\p{N}]?[\\p{Lu}\\p{Lt}\\p{Lm}\\p{Lo}\\p{M}]+[\\p{Ll}\\p{Lm}\\p{Lo}\\p{M}]*|\\p{N}| ?[^\\s\\p{L}\\p{N}]+[\\r\\n/]*|\\s*[\\r\\n]+|\\s+(?!\\S)|\\s+"
+          },
+          "behavior": "Isolated",
+          "invert": false
+        },
+        {
+          "type": "ByteLevel",
+          "add_prefix_space": false,
+          "trim_offsets": true,
+          "use_regex": false
+        }
+      ]
+    }
+  },
+  "added_tokens": [
+    {
+      "token": "fileprivate(set)",
+      "id": 131072
+    },
+    {
+      "token": "representational",
+      "id": 131073
+    },
+    {
+      "token": "associatedtype",
+      "id": 131074
+    },
+    {
+      "token": "NA_character_",
+      "id": 131075
+    },
+    {
+      "token": "__attribute__",
+      "id": 131076
+    },
+    {
+      "token": "__extension__",
+      "id": 131077
+    },
+    {
+      "token": "__forceinline",
+      "id": 131078
+    },
+    {
+      "token": "associativity",
+      "id": 131079
+    },
+    {
+      "token": "internal(set)",
+      "id": 131080
+    },
+    {
+      "token": "static_assert",
+      "id": 131081
+    },
+    {
+      "token": "unique symbol",
+      "id": 131082
+    },
+    {
+      "token": "__restrict__",
+      "id": 131083
+    },
+    {
+      "token": "__vectorcall",
+      "id": 131084
+    },
+    {
+      "token": "__volatile__",
+      "id": 131085
+    },
+    {
+      "token": "cd*m^2*m^(-2",
+      "id": 131086
+    },
+    {
+      "token": "cd*sr*kg^(-1",
+      "id": 131087
+    },
+    {
+      "token": "kg*m^2*s^(-1",
+      "id": 131088
+    },
+    {
+      "token": "kg*m^2*s^(-2",
+      "id": 131089
+    },
+    {
+      "token": "kg*m^2*s^(-3",
+      "id": 131090
+    },
+    {
+      "token": "macro_rules!",
+      "id": 131091
+    },
+    {
+      "token": "private(set)",
+      "id": 131092
+    },
+    {
+      "token": "synchronized",
+      "id": 131093
+    },
+    {
+      "token": "thread_local",
+      "id": 131094
+    },
+    {
+      "token": "CROSS_BUILD",
+      "id": 131095
+    },
+    {
+      "token": "HEALTHCHECK",
+      "id": 131096
+    },
+    {
+      "token": "NA_complex_",
+      "id": 131097
+    },
+    {
+      "token": "NA_integer_",
+      "id": 131098
+    },
+    {
+      "token": "__alignof__",
+      "id": 131099
+    },
+    {
+      "token": "__attribute",
+      "id": 131100
+    },
+    {
+      "token": "__unaligned",
+      "id": 131101
+    },
+    {
+      "token": "_heredoc_nl",
+      "id": 131102
+    },
+    {
+      "token": "cd*sr*W^(-1",
+      "id": 131103
+    },
+    {
+      "token": "cd*sr*m^(-2",
+      "id": 131104
+    },
+    {
+      "token": "crossinline",
+      "id": 131105
+    },
+    {
+      "token": "fallthrough",
+      "id": 131106
+    },
+    {
+      "token": "fileprivate",
+      "id": 131107
+    },
+    {
+      "token": "initializer",
+      "id": 131108
+    },
+    {
+      "token": "mol*mol^(-1",
+      "id": 131109
+    },
+    {
+      "token": "#available",
+      "id": 131110
+    },
+    {
+      "token": "#endregion",
+      "id": 131111
+    },
+    {
+      "token": "@keyframes",
+      "id": 131112
+    },
+    {
+      "token": "@namespace",
+      "id": 131113
+    },
+    {
+      "token": "A*s*kg^(-1",
+      "id": 131114
+    },
+    {
+      "token": "ENTRYPOINT",
+      "id": 131115
+    },
+    {
+      "token": "STOPSIGNAL",
+      "id": 131116
+    },
+    {
+      "token": "__declspec",
+      "id": 131117
+    },
+    {
+      "token": "__fastcall",
+      "id": 131118
+    },
+    {
+      "token": "__future__",
+      "id": 131119
+    },
+    {
+      "token": "__inline__",
+      "id": 131120
+    },
+    {
+      "token": "__refvalue",
+      "id": 131121
+    },
+    {
+      "token": "__thiscall",
+      "id": 131122
+    },
+    {
+      "token": "_end_ident",
+      "id": 131123
+    },
+    {
+      "token": "_unaligned",
+      "id": 131124
+    },
+    {
+      "token": "baremodule",
+      "id": 131125
+    },
+    {
+      "token": "descending",
+      "id": 131126
+    },
+    {
+      "token": "filter-out",
+      "id": 131127
+    },
+    {
+      "token": "findstring",
+      "id": 131128
+    },
+    {
+      "token": "implements",
+      "id": 131129
+    },
+    {
+      "token": "instanceof",
+      "id": 131130
+    },
+    {
+      "token": "kg*m*s^(-2",
+      "id": 131131
+    },
+    {
+      "token": "kg*m*s^(-3",
+      "id": 131132
+    },
+    {
+      "token": "m^3*kg^(-1",
+      "id": 131133
+    },
+    {
+      "token": "non-sealed",
+      "id": 131134
+    },
+    {
+      "token": "precedence",
+      "id": 131135
+    },
+    {
+      "token": "stackalloc",
+      "id": 131136
+    },
+    {
+      "token": "static get",
+      "id": 131137
+    },
+    {
+      "token": "transitive",
+      "id": 131138
+    },
+    {
+      "token": "#elifndef",
+      "id": 131139
+    },
+    {
+      "token": "#nullable",
+      "id": 131140
+    },
+    {
+      "token": "@supports",
+      "id": 131141
+    },
+    {
+      "token": "A*s*m^(-2",
+      "id": 131142
+    },
+    {
+      "token": "A*s*m^(-3",
+      "id": 131143
+    },
+    {
+      "token": "J*mol^(-1",
+      "id": 131144
+    },
+    {
+      "token": "_Noreturn",
+      "id": 131145
+    },
+    {
+      "token": "__alignof",
+      "id": 131146
+    },
+    {
+      "token": "__clrcall",
+      "id": 131147
+    },
+    {
+      "token": "__finally",
+      "id": 131148
+    },
+    {
+      "token": "__makeref",
+      "id": 131149
+    },
+    {
+      "token": "__reftype",
+      "id": 131150
+    },
+    {
+      "token": "__stdcall",
+      "id": 131151
+    },
+    {
+      "token": "addprefix",
+      "id": 131152
+    },
+    {
+      "token": "addsuffix",
+      "id": 131153
+    },
+    {
+      "token": "ascending",
+      "id": 131154
+    },
+    {
+      "token": "canImport",
+      "id": 131155
+    },
+    {
+      "token": "co_return",
+      "id": 131156
+    },
+    {
+      "token": "companion",
+      "id": 131157
+    },
+    {
+      "token": "consteval",
+      "id": 131158
+    },
+    {
+      "token": "constexpr",
+      "id": 131159
+    },
+    {
+      "token": "constinit",
+      "id": 131160
+    },
+    {
+      "token": "continue@",
+      "id": 131161
+    },
+    {
+      "token": "covariant",
+      "id": 131162
+    },
+    {
+      "token": "firstword",
+      "id": 131163
+    },
+    {
+      "token": "kat*m^(-3",
+      "id": 131164
+    },
+    {
+      "token": "m^2*s^(-2",
+      "id": 131165
+    },
+    {
+      "token": "m^2*s^(-3",
+      "id": 131166
+    },
+    {
+      "token": "mol*m^(-3",
+      "id": 131167
+    },
+    {
+      "token": "mol*s^(-1",
+      "id": 131168
+    },
+    {
+      "token": "pat_param",
+      "id": 131169
+    },
+    {
+      "token": "primitive",
+      "id": 131170
+    },
+    {
+      "token": "qualified",
+      "id": 131171
+    },
+    {
+      "token": "rad*s^(-1",
+      "id": 131172
+    },
+    {
+      "token": "rad*s^(-2",
+      "id": 131173
+    },
+    {
+      "token": "satisfies",
+      "id": 131174
+    },
+    {
+      "token": "subscript",
+      "id": 131175
+    },
+    {
+      "token": "transient",
+      "id": 131176
+    },
+    {
+      "token": "typealias",
+      "id": 131177
+    },
+    {
+      "token": "unmanaged",
+      "id": 131178
+    },
+    {
+      "token": "#elifdef",
+      "id": 131179
+    },
+    {
+      "token": "#warning",
+      "id": 131180
+    },
+    {
+      "token": "-include",
+      "id": 131181
+    },
+    {
+      "token": "@charset",
+      "id": 131182
+    },
+    {
+      "token": "C*kg^(-1",
+      "id": 131183
+    },
+    {
+      "token": "Fastcall",
+      "id": 131184
+    },
+    {
+      "token": "Gy*s^(-1",
+      "id": 131185
+    },
+    {
+      "token": "J*kg^(-1",
+      "id": 131186
+    },
+    {
+      "token": "NA_real_",
+      "id": 131187
+    },
+    {
+      "token": "Thiscall",
+      "id": 131188
+    },
+    {
+      "token": "W*sr^(-1",
+      "id": 131189
+    },
+    {
+      "token": "_Alignas",
+      "id": 131190
+    },
+    {
+      "token": "_Alignof",
+      "id": 131191
+    },
+    {
+      "token": "_Generic",
+      "id": 131192
+    },
+    {
+      "token": "_Nonnull",
+      "id": 131193
+    },
+    {
+      "token": "__except",
+      "id": 131194
+    },
+    {
+      "token": "__inline",
+      "id": 131195
+    },
+    {
+      "token": "__thread",
+      "id": 131196
+    },
+    {
+      "token": "_alignof",
+      "id": 131197
+    },
+    {
+      "token": "accessor",
+      "id": 131198
+    },
+    {
+      "token": "anyclass",
+      "id": 131199
+    },
+    {
+      "token": "basename",
+      "id": 131200
+    },
+    {
+      "token": "cd*m^(-2",
+      "id": 131201
+    },
+    {
+      "token": "checksum",
+      "id": 131202
+    },
+    {
+      "token": "cm*s^(-2",
+      "id": 131203
+    },
+    {
+      "token": "co_await",
+      "id": 131204
+    },
+    {
+      "token": "co_yield",
+      "id": 131205
+    },
+    {
+      "token": "compiler",
+      "id": 131206
+    },
+    {
+      "token": "debugger",
+      "id": 131207
+    },
+    {
+      "token": "decltype",
+      "id": 131208
+    },
+    {
+      "token": "deferred",
+      "id": 131209
+    },
+    {
+      "token": "defined?",
+      "id": 131210
+    },
+    {
+      "token": "deriving",
+      "id": 131211
+    },
+    {
+      "token": "exclave_",
+      "id": 131212
+    },
+    {
+      "token": "explicit",
+      "id": 131213
+    },
+    {
+      "token": "indirect",
+      "id": 131214
+    },
+    {
+      "token": "kg*m^(-1",
+      "id": 131215
+    },
+    {
+      "token": "kg*m^(-2",
+      "id": 131216
+    },
+    {
+      "token": "kg*m^(-3",
+      "id": 131217
+    },
+    {
+      "token": "kg*s^(-2",
+      "id": 131218
+    },
+    {
+      "token": "kg*s^(-3",
+      "id": 131219
+    },
+    {
+      "token": "kind_of_",
+      "id": 131220
+    },
+    {
+      "token": "lastword",
+      "id": 131221
+    },
+    {
+      "token": "lateinit",
+      "id": 131222
+    },
+    {
+      "token": "lifetime",
+      "id": 131223
+    },
+    {
+      "token": "lm*W^(-1",
+      "id": 131224
+    },
+    {
+      "token": "nmol/mol",
+      "id": 131225
+    },
+    {
+      "token": "noexcept",
+      "id": 131226
+    },
+    {
+      "token": "noinline",
+      "id": 131227
+    },
+    {
+      "token": "nonlocal",
+      "id": 131228
+    },
+    {
+      "token": "noreturn",
+      "id": 131229
+    },
+    {
+      "token": "offsetof",
+      "id": 131230
+    },
+    {
+      "token": "patsubst",
+      "id": 131231
+    },
+    {
+      "token": "provides",
+      "id": 131232
+    },
+    {
+      "token": "realpath",
+      "id": 131233
+    },
+    {
+      "token": "restrict",
+      "id": 131234
+    },
+    {
+      "token": "rethrows",
+      "id": 131235
+    },
+    {
+      "token": "setparam",
+      "id": 131236
+    },
+    {
+      "token": "sinclude",
+      "id": 131237
+    },
+    {
+      "token": "strictfp",
+      "id": 131238
+    },
+    {
+      "token": "undefine",
+      "id": 131239
+    },
+    {
+      "token": "unexport",
+      "id": 131240
+    },
+    {
+      "token": "unsetenv",
+      "id": 131241
+    },
+    {
+      "token": "warnings",
+      "id": 131242
+    },
+    {
+      "token": "wildcard",
+      "id": 131243
+    },
+    {
+      "token": "#elseif",
+      "id": 131244
+    },
+    {
+      "token": "#region",
+      "id": 131245
+    },
+    {
+      "token": "@import",
+      "id": 131246
+    },
+    {
+      "token": "A*m^(-1",
+      "id": 131247
+    },
+    {
+      "token": "A*m^(-2",
+      "id": 131248
+    },
+    {
+      "token": "C*m^(-2",
+      "id": 131249
+    },
+    {
+      "token": "C*m^(-3",
+      "id": 131250
+    },
+    {
+      "token": "F*m^(-1",
+      "id": 131251
+    },
+    {
+      "token": "H*m^(-1",
+      "id": 131252
+    },
+    {
+      "token": "J*K^(-1",
+      "id": 131253
+    },
+    {
+      "token": "J*m^(-3",
+      "id": 131254
+    },
+    {
+      "token": "N*A^(-2",
+      "id": 131255
+    },
+    {
+      "token": "N*m^(-1",
+      "id": 131256
+    },
+    {
+      "token": "N*m^(-2",
+      "id": 131257
+    },
+    {
+      "token": "ONBUILD",
+      "id": 131258
+    },
+    {
+      "token": "Stdcall",
+      "id": 131259
+    },
+    {
+      "token": "V*m^(-1",
+      "id": 131260
+    },
+    {
+      "token": "W*m^(-1",
+      "id": 131261
+    },
+    {
+      "token": "W*m^(-2",
+      "id": 131262
+    },
+    {
+      "token": "WORKDIR",
+      "id": 131263
+    },
+    {
+      "token": "_Atomic",
+      "id": 131264
+    },
+    {
+      "token": "__asm__",
+      "id": 131265
+    },
+    {
+      "token": "__based",
+      "id": 131266
+    },
+    {
+      "token": "__cdecl",
+      "id": 131267
+    },
+    {
+      "token": "__leave",
+      "id": 131268
+    },
+    {
+      "token": "abspath",
+      "id": 131269
+    },
+    {
+      "token": "alignas",
+      "id": 131270
+    },
+    {
+      "token": "alignof",
+      "id": 131271
+    },
+    {
+      "token": "asserts",
+      "id": 131272
+    },
+    {
+      "token": "borrow_",
+      "id": 131273
+    },
+    {
+      "token": "concept",
+      "id": 131274
+    },
+    {
+      "token": "derives",
+      "id": 131275
+    },
+    {
+      "token": "doctype",
+      "id": 131276
+    },
+    {
+      "token": "forSome",
+      "id": 131277
+    },
+    {
+      "token": "functor",
+      "id": 131278
+    },
+    {
+      "token": "global_",
+      "id": 131279
+    },
+    {
+      "token": "literal",
+      "id": 131280
+    },
+    {
+      "token": "m*s^(-1",
+      "id": 131281
+    },
+    {
+      "token": "m*s^(-2",
+      "id": 131282
+    },
+    {
+      "token": "mol/mol",
+      "id": 131283
+    },
+    {
+      "token": "mol^(-1",
+      "id": 131284
+    },
+    {
+      "token": "newtype",
+      "id": 131285
+    },
+    {
+      "token": "nominal",
+      "id": 131286
+    },
+    {
+      "token": "notnull",
+      "id": 131287
+    },
+    {
+      "token": "nullptr",
+      "id": 131288
+    },
+    {
+      "token": "orderby",
+      "id": 131289
+    },
+    {
+      "token": "permits",
+      "id": 131290
+    },
+    {
+      "token": "postfix",
+      "id": 131291
+    },
+    {
+      "token": "reified",
+      "id": 131292
+    },
+    {
+      "token": "restore",
+      "id": 131293
+    },
+    {
+      "token": "return@",
+      "id": 131294
+    },
+    {
+      "token": "suspend",
+      "id": 131295
+    },
+    {
+      "token": "tailrec",
+      "id": 131296
+    },
+    {
+      "token": "typeset",
+      "id": 131297
+    },
+    {
+      "token": "typevar",
+      "id": 131298
+    },
+    {
+      "token": "#error",
+      "id": 131299
+    },
+    {
+      "token": "#false",
+      "id": 131300
+    },
+    {
+      "token": "@media",
+      "id": 131301
+    },
+    {
+      "token": "@scope",
+      "id": 131302
+    },
+    {
+      "token": "Wb/m^2",
+      "id": 131303
+    },
+    {
+      "token": "and_eq",
+      "id": 131304
+    },
+    {
+      "token": "async*",
+      "id": 131305
+    },
+    {
+      "token": "bitand",
+      "id": 131306
+    },
+    {
+      "token": "break@",
+      "id": 131307
+    },
+    {
+      "token": "cm^(-1",
+      "id": 131308
+    },
+    {
+      "token": "dbel_B",
+      "id": 131309
+    },
+    {
+      "token": "deinit",
+      "id": 131310
+    },
+    {
+      "token": "downto",
+      "id": 131311
+    },
+    {
+      "token": "dprime",
+      "id": 131312
+    },
+    {
+      "token": "flavor",
+      "id": 131313
+    },
+    {
+      "token": "hiding",
+      "id": 131314
+    },
+    {
+      "token": "ifndef",
+      "id": 131315
+    },
+    {
+      "token": "infixl",
+      "id": 131316
+    },
+    {
+      "token": "infixr",
+      "id": 131317
+    },
+    {
+      "token": "intcmp",
+      "id": 131318
+    },
+    {
+      "token": "is not",
+      "id": 131319
+    },
+    {
+      "token": "kg/mol",
+      "id": 131320
+    },
+    {
+      "token": "kg^(-1",
+      "id": 131321
+    },
+    {
+      "token": "lm/m^2",
+      "id": 131322
+    },
+    {
+      "token": "local_",
+      "id": 131323
+    },
+    {
+      "token": "nonrec",
+      "id": 131324
+    },
+    {
+      "token": "not in",
+      "id": 131325
+    },
+    {
+      "token": "not_eq",
+      "id": 131326
+    },
+    {
+      "token": "notdir",
+      "id": 131327
+    },
+    {
+      "token": "rescue",
+      "id": 131328
+    },
+    {
+      "token": "scoped",
+      "id": 131329
+    },
+    {
+      "token": "sealed",
+      "id": 131330
+    },
+    {
+      "token": "stack_",
+      "id": 131331
+    },
+    {
+      "token": "suffix",
+      "id": 131332
+    },
+    {
+      "token": "super@",
+      "id": 131333
+    },
+    {
+      "token": "vararg",
+      "id": 131334
+    },
+    {
+      "token": "x86_64",
+      "id": 131335
+    },
+    {
+      "token": "xor_eq",
+      "id": 131336
+    },
+    {
+      "token": "#elif",
+      "id": 131337
+    },
+    {
+      "token": "#true",
+      "id": 131338
+    },
+    {
+      "token": "Cdecl",
+      "id": 131339
+    },
+    {
+      "token": "LABEL",
+      "id": 131340
+    },
+    {
+      "token": "SHELL",
+      "id": 131341
+    },
+    {
+      "token": "VPATH",
+      "id": 131342
+    },
+    {
+      "token": "W^(-1",
+      "id": 131343
+    },
+    {
+      "token": "__asm",
+      "id": 131344
+    },
+    {
+      "token": "__try",
+      "id": 131345
+    },
+    {
+      "token": "bel_B",
+      "id": 131346
+    },
+    {
+      "token": "bitor",
+      "id": 131347
+    },
+    {
+      "token": "cd*sr",
+      "id": 131348
+    },
+    {
+      "token": "compl",
+      "id": 131349
+    },
+    {
+      "token": "defer",
+      "id": 131350
+    },
+    {
+      "token": "elsif",
+      "id": 131351
+    },
+    {
+      "token": "endef",
+      "id": 131352
+    },
+    {
+      "token": "guile",
+      "id": 131353
+    },
+    {
+      "token": "ifdef",
+      "id": 131354
+    },
+    {
+      "token": "ifneq",
+      "id": 131355
+    },
+    {
+      "token": "infer",
+      "id": 131356
+    },
+    {
+      "token": "infix",
+      "id": 131357
+    },
+    {
+      "token": "keyof",
+      "id": 131358
+    },
+    {
+      "token": "kind_",
+      "id": 131359
+    },
+    {
+      "token": "m/s^2",
+      "id": 131360
+    },
+    {
+      "token": "m^(-1",
+      "id": 131361
+    },
+    {
+      "token": "m^(-2",
+      "id": 131362
+    },
+    {
+      "token": "macOS",
+      "id": 131363
+    },
+    {
+      "token": "mixin",
+      "id": 131364
+    },
+    {
+      "token": "or_eq",
+      "id": 131365
+    },
+    {
+      "token": "rad/s",
+      "id": 131366
+    },
+    {
+      "token": "retry",
+      "id": 131367
+    },
+    {
+      "token": "s^(-1",
+      "id": 131368
+    },
+    {
+      "token": "subst",
+      "id": 131369
+    },
+    {
+      "token": "swift",
+      "id": 131370
+    },
+    {
+      "token": "sync*",
+      "id": 131371
+    },
+    {
+      "token": "this@",
+      "id": 131372
+    },
+    {
+      "token": "trait",
+      "id": 131373
+    },
+    {
+      "token": "vpath",
+      "id": 131374
+    },
+    {
+      "token": "(?P<",
+      "id": 131375
+    },
+    {
+      "token": "(?P=",
+      "id": 131376
+    },
+    {
+      "token": "/tcp",
+      "id": 131377
+    },
+    {
+      "token": "/udp",
+      "id": 131378
+    },
+    {
+      "token": ">>>=",
+      "id": 131379
+    },
+    {
+      "token": "COPY",
+      "id": 131380
+    },
+    {
+      "token": "GOhm",
+      "id": 131381
+    },
+    {
+      "token": "J/kg",
+      "id": 131382
+    },
+    {
+      "token": "NONE",
+      "id": 131383
+    },
+    {
+      "token": "Pa*s",
+      "id": 131384
+    },
+    {
+      "token": "Wb/A",
+      "id": 131385
+    },
+    {
+      "token": "[@@@",
+      "id": 131386
+    },
+    {
+      "token": "cm^3",
+      "id": 131387
+    },
+    {
+      "token": "degC",
+      "id": 131388
+    },
+    {
+      "token": "dm^3",
+      "id": 131389
+    },
+    {
+      "token": "esac",
+      "id": 131390
+    },
+    {
+      "token": "hm^2",
+      "id": 131391
+    },
+    {
+      "token": "ifeq",
+      "id": 131392
+    },
+    {
+      "token": "kOhm",
+      "id": 131393
+    },
+    {
+      "token": "km/h",
+      "id": 131394
+    },
+    {
+      "token": "lazy",
+      "id": 131395
+    },
+    {
+      "token": "lm/W",
+      "id": 131396
+    },
+    {
+      "token": "lxor",
+      "id": 131397
+    },
+    {
+      "token": "m//s",
+      "id": 131398
+    },
+    {
+      "token": "mm^2",
+      "id": 131399
+    },
+    {
+      "token": "mmol",
+      "id": 131400
+    },
+    {
+      "token": "r\"\"\"",
+      "id": 131401
+    },
+    {
+      "token": "r'''",
+      "id": 131402
+    },
+    {
+      "token": "tvOS",
+      "id": 131403
+    },
+    {
+      "token": "u8R\"",
+      "id": 131404
+    },
+    {
+      "token": "um/m",
+      "id": 131405
+    },
+    {
+      "token": "!==",
+      "id": 131406
+    },
+    {
+      "token": "$((",
+      "id": 131407
+    },
+    {
+      "token": "%i(",
+      "id": 131408
+    },
+    {
+      "token": "%w(",
+      "id": 131409
+    },
+    {
+      "token": "&&&",
+      "id": 131410
+    },
+    {
+      "token": "&&=",
+      "id": 131411
+    },
+    {
+      "token": "&>>",
+      "id": 131412
+    },
+    {
+      "token": "&^=",
+      "id": 131413
+    },
+    {
+      "token": "'''",
+      "id": 131414
+    },
+    {
+      "token": "(?:",
+      "id": 131415
+    },
+    {
+      "token": "(?<",
+      "id": 131416
+    },
+    {
+      "token": "**=",
+      "id": 131417
+    },
+    {
+      "token": "+?:",
+      "id": 131418
+    },
+    {
+      "token": "->*",
+      "id": 131419
+    },
+    {
+      "token": "->.",
+      "id": 131420
+    },
+    {
+      "token": "->>",
+      "id": 131421
+    },
+    {
+      "token": "-?:",
+      "id": 131422
+    },
+    {
+      "token": "..<",
+      "id": 131423
+    },
+    {
+      "token": "..=",
+      "id": 131424
+    },
+    {
+      "token": "//=",
+      "id": 131425
+    },
+    {
+      "token": "::=",
+      "id": 131426
+    },
+    {
+      "token": ";;&",
+      "id": 131427
+    },
+    {
+      "token": "<&-",
+      "id": 131428
+    },
+    {
+      "token": "<<-",
+      "id": 131429
+    },
+    {
+      "token": "<<<",
+      "id": 131430
+    },
+    {
+      "token": "<<=",
+      "id": 131431
+    },
+    {
+      "token": "<<~",
+      "id": 131432
+    },
+    {
+      "token": "<=>",
+      "id": 131433
+    },
+    {
+      "token": "<|>",
+      "id": 131434
+    },
+    {
+      "token": "<~>",
+      "id": 131435
+    },
+    {
+      "token": "=>>",
+      "id": 131436
+    },
+    {
+      "token": ">&-",
+      "id": 131437
+    },
+    {
+      "token": ">>=",
+      "id": 131438
+    },
+    {
+      "token": "?->",
+      "id": 131439
+    },
+    {
+      "token": "?..",
+      "id": 131440
+    },
+    {
+      "token": "?=>",
+      "id": 131441
+    },
+    {
+      "token": "??=",
+      "id": 131442
+    },
+    {
+      "token": "A*s",
+      "id": 131443
+    },
+    {
+      "token": "A/V",
+      "id": 131444
+    },
+    {
+      "token": "C/V",
+      "id": 131445
+    },
+    {
+      "token": "CMD",
+      "id": 131446
+    },
+    {
+      "token": "Gi-",
+      "id": 131447
+    },
+    {
+      "token": "H/m",
+      "id": 131448
+    },
+    {
+      "token": "J*s",
+      "id": 131449
+    },
+    {
+      "token": "J/K",
+      "id": 131450
+    },
+    {
+      "token": "J/s",
+      "id": 131451
+    },
+    {
+      "token": "Ki-",
+      "id": 131452
+    },
+    {
+      "token": "LR\"",
+      "id": 131453
+    },
+    {
+      "token": "Mi-",
+      "id": 131454
+    },
+    {
+      "token": "N*m",
+      "id": 131455
+    },
+    {
+      "token": "Ohm",
+      "id": 131456
+    },
+    {
+      "token": "Pi-",
+      "id": 131457
+    },
+    {
+      "token": "THz",
+      "id": 131458
+    },
+    {
+      "token": "Ti-",
+      "id": 131459
+    },
+    {
+      "token": "UR\"",
+      "id": 131460
+    },
+    {
+      "token": "V*A",
+      "id": 131461
+    },
+    {
+      "token": "V*s",
+      "id": 131462
+    },
+    {
+      "token": "V/A",
+      "id": 131463
+    },
+    {
+      "token": "W/A",
+      "id": 131464
+    },
+    {
+      "token": "Yi-",
+      "id": 131465
+    },
+    {
+      "token": "Zi-",
+      "id": 131466
+    },
+    {
+      "token": "[%%",
+      "id": 131467
+    },
+    {
+      "token": "[@@",
+      "id": 131468
+    },
+    {
+      "token": "[]=",
+      "id": 131469
+    },
+    {
+      "token": "]]>",
+      "id": 131470
+    },
+    {
+      "token": "^^^",
+      "id": 131471
+    },
+    {
+      "token": "as?",
+      "id": 131472
+    },
+    {
+      "token": "asr",
+      "id": 131473
+    },
+    {
+      "token": "da-",
+      "id": 131474
+    },
+    {
+      "token": "dyn",
+      "id": 131475
+    },
+    {
+      "token": "iOS",
+      "id": 131476
+    },
+    {
+      "token": "kPa",
+      "id": 131477
+    },
+    {
+      "token": "lsl",
+      "id": 131478
+    },
+    {
+      "token": "lsr",
+      "id": 131479
+    },
+    {
+      "token": "m/m",
+      "id": 131480
+    },
+    {
+      "token": "m/s",
+      "id": 131481
+    },
+    {
+      "token": "m^2",
+      "id": 131482
+    },
+    {
+      "token": "m^3",
+      "id": 131483
+    },
+    {
+      "token": "mdo",
+      "id": 131484
+    },
+    {
+      "token": "u8\"",
+      "id": 131485
+    },
+    {
+      "token": "u8'",
+      "id": 131486
+    },
+    {
+      "token": "uR\"",
+      "id": 131487
+    },
+    {
+      "token": "{%%",
+      "id": 131488
+    },
+    {
+      "token": "||=",
+      "id": 131489
+    },
+    {
+      "token": "||]",
+      "id": 131490
+    },
+    {
+      "token": "|||",
+      "id": 131491
+    },
+    {
+      "token": "~/=",
+      "id": 131492
+    },
+    {
+      "token": "~>>",
+      "id": 131493
+    },
+    {
+      "token": "~~~",
+      "id": 131494
+    },
+    {
+      "token": "!~",
+      "id": 131495
+    },
+    {
+      "token": "#'",
+      "id": 131496
+    },
+    {
+      "token": "#(",
+      "id": 131497
+    },
+    {
+      "token": "#)",
+      "id": 131498
+    },
+    {
+      "token": "$=",
+      "id": 131499
+    },
+    {
+      "token": "$[",
+      "id": 131500
+    },
+    {
+      "token": "$`",
+      "id": 131501
+    },
+    {
+      "token": "&.",
+      "id": 131502
+    },
+    {
+      "token": "&:",
+      "id": 131503
+    },
+    {
+      "token": "&>",
+      "id": 131504
+    },
+    {
+      "token": "&^",
+      "id": 131505
+    },
+    {
+      "token": "+@",
+      "id": 131506
+    },
+    {
+      "token": "-=",
+      "id": 131507
+    },
+    {
+      "token": "-@",
+      "id": 131508
+    },
+    {
+      "token": "/=",
+      "id": 131509
+    },
+    {
+      "token": ":>",
+      "id": 131510
+    },
+    {
+      "token": ":?",
+      "id": 131511
+    },
+    {
+      "token": "<&",
+      "id": 131512
+    },
+    {
+      "token": "<:",
+      "id": 131513
+    },
+    {
+      "token": "<~",
+      "id": 131514
+    },
+    {
+      "token": "=~",
+      "id": 131515
+    },
+    {
+      "token": ">|",
+      "id": 131516
+    },
+    {
+      "token": ">}",
+      "id": 131517
+    },
+    {
+      "token": "?=",
+      "id": 131518
+    },
+    {
+      "token": "@=",
+      "id": 131519
+    },
+    {
+      "token": "Bq",
+      "id": 131520
+    },
+    {
+      "token": "E-",
+      "id": 131521
+    },
+    {
+      "token": "G-",
+      "id": 131522
+    },
+    {
+      "token": "L\"",
+      "id": 131523
+    },
+    {
+      "token": "L'",
+      "id": 131524
+    },
+    {
+      "token": "M-",
+      "id": 131525
+    },
+    {
+      "token": "Np",
+      "id": 131526
+    },
+    {
+      "token": "P-",
+      "id": 131527
+    },
+    {
+      "token": "Q-",
+      "id": 131528
+    },
+    {
+      "token": "R\"",
+      "id": 131529
+    },
+    {
+      "token": "R-",
+      "id": 131530
+    },
+    {
+      "token": "T-",
+      "id": 131531
+    },
+    {
+      "token": "U\"",
+      "id": 131532
+    },
+    {
+      "token": "U'",
+      "id": 131533
+    },
+    {
+      "token": "Wb",
+      "id": 131534
+    },
+    {
+      "token": "Y-",
+      "id": 131535
+    },
+    {
+      "token": "Z-",
+      "id": 131536
+    },
+    {
+      "token": "[<",
+      "id": 131537
+    },
+    {
+      "token": "[>",
+      "id": 131538
+    },
+    {
+      "token": "[|",
+      "id": 131539
+    },
+    {
+      "token": "\\ ",
+      "id": 131540
+    },
+    {
+      "token": "\\k",
+      "id": 131541
+    },
+    {
+      "token": "^=",
+      "id": 131542
+    },
+    {
+      "token": "a-",
+      "id": 131543
+    },
+    {
+      "token": "c-",
+      "id": 131544
+    },
+    {
+      "token": "d-",
+      "id": 131545
+    },
+    {
+      "token": "eV",
+      "id": 131546
+    },
+    {
+      "token": "f-",
+      "id": 131547
+    },
+    {
+      "token": "h-",
+      "id": 131548
+    },
+    {
+      "token": "k-",
+      "id": 131549
+    },
+    {
+      "token": "m-",
+      "id": 131550
+    },
+    {
+      "token": "n-",
+      "id": 131551
+    },
+    {
+      "token": "p-",
+      "id": 131552
+    },
+    {
+      "token": "q-",
+      "id": 131553
+    },
+    {
+      "token": "r\"",
+      "id": 131554
+    },
+    {
+      "token": "r'",
+      "id": 131555
+    },
+    {
+      "token": "r-",
+      "id": 131556
+    },
+    {
+      "token": "u\"",
+      "id": 131557
+    },
+    {
+      "token": "u'",
+      "id": 131558
+    },
+    {
+      "token": "u-",
+      "id": 131559
+    },
+    {
+      "token": "y-",
+      "id": 131560
+    },
+    {
+      "token": "z-",
+      "id": 131561
+    },
+    {
+      "token": "{<",
+      "id": 131562
+    },
+    {
+      "token": "|&",
+      "id": 131563
+    },
+    {
+      "token": "|>",
+      "id": 131564
+    },
+    {
+      "token": "|]",
+      "id": 131565
+    },
+    {
+      "token": "~=",
+      "id": 131566
+    },
+    {
+      "token": "~>",
+      "id": 131567
+    },
+    {
+      "token": "~@",
+      "id": 131568
+    },
+    {
+      "token": "\u0000",
+      "id": 131569
+    },
+    {
+      "token": "\t",
+      "id": 131570
+    },
+    {
+      "token": "\n",
+      "id": 131571
+    },
+    {
+      "token": "←",
+      "id": 131572
+    },
+    {
+      "token": "→",
+      "id": 131573
+    },
+    {
+      "token": "⇒",
+      "id": 131574
+    },
+    {
+      "token": "∀",
+      "id": 131575
+    },
+    {
+      "token": "∷",
+      "id": 131576
+    },
+    {
+      "token": "⊸",
+      "id": 131577
+    },
+    {
+      "token": "★",
+      "id": 131578
+    },
+    {
+      "token": "⟦",
+      "id": 131579
+    },
+    {
+      "token": "⟧",
+      "id": 131580
+    }
+  ]
+}

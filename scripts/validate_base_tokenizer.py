@@ -3,10 +3,10 @@ import argparse
 from transformers import AutoTokenizer
 
 
-MODEL_ID = "tokenizer/NVIDIA-Nemotron-3-Super-120B-A12B-vocab-extended"
+MODEL_ID = "tokenizer/NVIDIA-Nemotron-3-Super-120B-A12B-vocab-extended_II"
 
 CONVERSATION = """Hello how are you
-I am fine
+I am fine def definition
 """
 
 
