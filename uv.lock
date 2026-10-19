@@ -1267,6 +1267,7 @@ dependencies = [
     { name = "datasets" },
     { name = "datatrove", extra = ["io", "processing"] },
     { name = "matplotlib" },
+    { name = "megatron-core" },
     { name = "numpy" },
     { name = "pyarrow" },
     { name = "sentencepiece" },
@@ -1287,6 +1288,7 @@ requires-dist = [
     { name = "datasets", specifier = ">=5.0.1" },
     { name = "datatrove", extras = ["io", "processing"], specifier = ">=0.10.1" },
     { name = "matplotlib", specifier = ">=3.11.2" },
+    { name = "megatron-core", specifier = ">=0.19.2" },
     { name = "numpy", specifier = ">=2.5.3" },
     { name = "pyarrow", specifier = ">=25.0.1" },
     { name = "sentencepiece", specifier = ">=0.2.2" },
@@ -1593,6 +1595,25 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d6/54/cfe61301667036ec958cb99bd3efefba235e65cdeb9c84d24a8293ba1d90/mdurl-0.1.2.tar.gz", hash = "sha256:bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba", size = 8729, upload-time = "2022-08-14T12:40:10.846Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b3/38/89ba8ad64ae25be8de66a6d463314cf1eb366222074cfda9ee839c56a4b4/mdurl-0.1.2-py3-none-any.whl", hash = "sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8", size = 9979, upload-time = "2022-08-14T12:40:09.779Z" },
+]
+
+[[package]]
+name = "megatron-core"
+version = "0.19.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+    { name = "packaging" },
+    { name = "torch", version = "2.14.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "sys_platform == 'darwin'" },
+    { name = "torch", version = "2.14.0", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'win32'" },
+    { name = "torch", version = "2.14.0+cu132", source = { registry = "https://download.pytorch.org/whl/cu132" }, marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/31/29/99972ea43de5d22afcdda2f31f21599fbcea527dbfedfaf3638250a13163/megatron_core-0.19.2.tar.gz", hash = "sha256:de643eee32007a7504ad52f061103fe7432503603b6321c16c861eb67dbd3353", size = 1957594, upload-time = "2026-09-18T19:39:53.756Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/87/5e/3aec08bf64c83cf434794684833cde4f9af196aab2021f62e97462d433fb/megatron_core-0.19.2-cp312-cp312-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:e1717c0cdb7669d2112c3f3d80a2e748d2721b4798044d750cab5a3b2dffe38f", size = 2363156, upload-time = "2026-09-18T19:39:46.742Z" },
+    { url = "https://files.pythonhosted.org/packages/f5/7c/80fa3726cef258d08b51a9ce879dbe5186e822e99863d55c7a7dd6fbdd62/megatron_core-0.19.2-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:8e3e486f13f559450415b9b9dc0ff3331a0bb83dd154553f7f350a75ff9c42b5", size = 2370641, upload-time = "2026-09-18T19:39:50.769Z" },
+    { url = "https://files.pythonhosted.org/packages/59/4d/7e167eef9b8071c725bdade337321daf5941dc11afbbb71a50a7ccd70f4f/megatron_core-0.19.2-cp313-cp313-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:346872950e729433c9477c59b5456b859fb7e457a1c0bb39c0c771c302a1d1ea", size = 2363144, upload-time = "2026-09-18T19:39:47.939Z" },
+    { url = "https://files.pythonhosted.org/packages/fc/bc/ac954943dfc487ca1b5acc7db38488b9867620725d1266d164463b370e64/megatron_core-0.19.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:10c70ab5273457f3c8232e35bc18633aa20abc6f6ac2d190914acd6323537826", size = 2370652, upload-time = "2026-09-18T19:39:52.146Z" },
 ]
 
 [[package]]

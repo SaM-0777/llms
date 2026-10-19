@@ -9,6 +9,7 @@ dependencies = [
     "datasets>=5.0.1",
     "datatrove[io,processing]>=0.10.1",
     "matplotlib>=3.11.2",
+    "megatron-core>=0.19.2",
     "numpy>=2.5.3",
     "pyarrow>=25.0.1",
     "sentencepiece>=0.2.2",
