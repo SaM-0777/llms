@@ -14,13 +14,13 @@ def main():
     }
 
     #print(len(mathematics))
-    print(len(scientific_notation))
+    #print(len(scientific_notation))
     print(len(unified))
 
     #unified.update(mathematics)
-    unified.update(scientific_notation)
+    #unified.update(scientific_notation)
 
-    print(len(unified))
+    #print(len(unified))
 
     data["unified"] = list(unified)
 

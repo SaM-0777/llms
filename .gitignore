@@ -19,3 +19,4 @@ extras/
 runs/
 wandb/
 checkpoints/
+benchmarks/
