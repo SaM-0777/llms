@@ -94,6 +94,7 @@ class Args:
             "sft",
             "qlora",
             "swe",
+            "extended_vocab",
         ]
     )
 
