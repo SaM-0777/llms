@@ -63,19 +63,19 @@ class Args:
 
     output_dir: str | Path = "output"
     num_train_epochs: float = 2.0
-    per_device_train_batch_size: int = 32
+    per_device_train_batch_size: int = 16
     per_device_eval_batch_size: int = 4
     gradient_accumulation_steps: int = 1
     learning_rate: float = 2e-4
     weight_decay: float = 0.01
-    warmup_steps: float = 250
+    warmup_steps: float = 10
     lr_scheduler_type: str = "cosine"
     logging_steps: int = 10
     eval_strategy: str = "steps"
-    eval_steps: int = 200
+    eval_steps: int = 100
     save_strategy: str = "steps"
-    save_steps: int = 200
-    save_total_limit: int = 2
+    save_steps: int = 100
+    save_total_limit: int = 5
     load_best_model_at_end: bool = True
     metric_for_best_model: str = "eval_loss"
     greater_is_better: bool = False
@@ -219,7 +219,6 @@ def get_model(model_id, quantization_config=None, **kwargs):
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
         quantization_config=quantization_config,
-        device_map="auto",
         **kwargs,
     )
     return model
@@ -303,6 +302,9 @@ def get_sft_config(args: Args) -> SFTConfig:
         ),
         metric_for_best_model=args.metric_for_best_model,
         greater_is_better=args.greater_is_better,
+        dataloader_num_workers=4,
+        dataloader_persistent_workers=True,
+        dataloader_prefetch_factor=2,
     )
 
 
@@ -364,17 +366,29 @@ def main(args: Args):
         lora_target_modules=args.lora_target_modules,
     )
 
-    quantization_config = get_quantization_config(
-        load_in_4bit=args.load_in_4bit,
-        quant_type=args.bnb_4bit_quant_type,
-        use_double_quant=args.bnb_4bit_use_double_quant,
-        compute_dtype=args.bnb_4bit_compute_dtype,
-    )
+    if args.load_in_4bit:
+        quantization_config = get_quantization_config(
+            load_in_4bit=args.load_in_4bit,
+            quant_type=args.bnb_4bit_quant_type,
+            use_double_quant=args.bnb_4bit_use_double_quant,
+            compute_dtype=args.bnb_4bit_compute_dtype,
+        )
 
-    model = get_model(model_id=model_id, quantization_config=quantization_config)
-    model = prepare_model_for_kbit_training(model)
+        model = get_model(
+            model_id=model_id,
+            quantization_config=quantization_config,
+            device_map={"": 0},
+        )
+        model = prepare_model_for_kbit_training(model)
+    else:
+        model = get_model(
+            model_id,
+            torch_dtype=torch.bfloat16,
+            device_map={"": 0},
+            attn_implementation="sdpa",
+        )
+
     model = get_peft_model(model, peft_config)
-
     model.config.use_cache = False
 
     trainer = run(
