@@ -20,6 +20,21 @@ import wandb
 LOG = logging.getLogger("SFT")
 
 
+class Trainer(SFTTrainer):
+    def compute_loss(
+        self, model, inputs, return_outputs=False, num_items_in_batch=None
+    ):
+        outputs = model(**inputs)
+        loss = outputs.loss
+
+        if loss is None:
+            raise RuntimeError(
+                "The model did not return a loss. Ensure inputs contain labels."
+            )
+
+        return (loss, outputs) if return_outputs else loss
+
+
 @dataclass
 class Args:
     seed: int = 42
@@ -356,7 +371,6 @@ def get_sft_config(args: Args) -> SFTConfig:
         dataloader_num_workers=4,
         dataloader_persistent_workers=True,
         dataloader_prefetch_factor=2,
-        
         loss_type="nll",
     )
 
@@ -370,7 +384,7 @@ def run(
 ):
     training_args = get_sft_config(args)
 
-    trainer = SFTTrainer(
+    trainer = Trainer(
         model=model,
         args=training_args,
         train_dataset=train_dataset,
@@ -455,8 +469,8 @@ def main(args: Args):
 
     model = get_peft_model(model, peft_config)
     model.config.use_cache = False
-    
-    eos_ids = [248046, 248044]
+
+    eos_ids = [248044, 248046]
     model.config.eos_token_id = eos_ids
     model.generation_config.eos_token_id = eos_ids
 
