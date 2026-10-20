@@ -1,0 +1,1288 @@
+{
+  "base_model": "Qwen/Qwen3.5-4B",
+  "input_json": "tokenizer/notation_lexicals_II.json",
+  "output_directory": "tokenizer/Qwen35-4B-vocab-extended",
+  "original_vocabulary_size": 248077,
+  "extended_vocabulary_size": 248389,
+  "lexical_strings_loaded": 816,
+  "strings_already_in_vocabulary": 504,
+  "new_tokens_added": 312,
+  "existing_token_ids_preserved": true,
+  "all_added_tokens_encode_as_single_token": true,
+  "lexical_matching": {
+    "strategy": "boundary-aware lexical split followed by the original pre-tokenizer",
+    "longest_match_first": true,
+    "lexical_regex_length": 5088,
+    "base_bpe_model_sha256": "028a8aa14a411ea601bbc7c9a88b232f3eeab0d4f6b0702a746b10e5cc45c365",
+    "extended_bpe_model_sha256": "028a8aa14a411ea601bbc7c9a88b232f3eeab0d4f6b0702a746b10e5cc45c365",
+    "original_pre_tokenizer": {
+      "type": "Sequence",
+      "pretokenizers": [
+        {
+          "type": "Split",
+          "pattern": {
+            "Regex": "(?i:'s|'t|'re|'ve|'m|'ll|'d)|[^\\r\\n\\p{L}\\p{N}]?\\p{L}+|\\p{N}| ?[^\\s\\p{L}\\p{N}]+[\\r\\n]*|\\s*[\\r\\n]+|\\s+(?!\\S)|\\s+"
+          },
+          "behavior": "Isolated",
+          "invert": false
+        },
+        {
+          "type": "ByteLevel",
+          "add_prefix_space": false,
+          "trim_offsets": true,
+          "use_regex": false
+        }
+      ]
+    }
+  },
+  "added_tokens": [
+    {
+      "token": "fileprivate(set)",
+      "id": 248077
+    },
+    {
+      "token": "associatedtype",
+      "id": 248078
+    },
+    {
+      "token": ".RECIPEPREFIX",
+      "id": 248079
+    },
+    {
+      "token": "NA_character_",
+      "id": 248080
+    },
+    {
+      "token": "__attribute__",
+      "id": 248081
+    },
+    {
+      "token": "__extension__",
+      "id": 248082
+    },
+    {
+      "token": "__forceinline",
+      "id": 248083
+    },
+    {
+      "token": "associativity",
+      "id": 248084
+    },
+    {
+      "token": "internal(set)",
+      "id": 248085
+    },
+    {
+      "token": "static_assert",
+      "id": 248086
+    },
+    {
+      "token": "unique symbol",
+      "id": 248087
+    },
+    {
+      "token": "__restrict__",
+      "id": 248088
+    },
+    {
+      "token": "__vectorcall",
+      "id": 248089
+    },
+    {
+      "token": "__volatile__",
+      "id": 248090
+    },
+    {
+      "token": "macro_rules!",
+      "id": 248091
+    },
+    {
+      "token": "private(set)",
+      "id": 248092
+    },
+    {
+      "token": "synchronized",
+      "id": 248093
+    },
+    {
+      "token": "thread_local",
+      "id": 248094
+    },
+    {
+      "token": "CROSS_BUILD",
+      "id": 248095
+    },
+    {
+      "token": "NA_complex_",
+      "id": 248096
+    },
+    {
+      "token": "NA_integer_",
+      "id": 248097
+    },
+    {
+      "token": "__alignof__",
+      "id": 248098
+    },
+    {
+      "token": "__attribute",
+      "id": 248099
+    },
+    {
+      "token": "__unaligned",
+      "id": 248100
+    },
+    {
+      "token": "_heredoc_nl",
+      "id": 248101
+    },
+    {
+      "token": "crossinline",
+      "id": 248102
+    },
+    {
+      "token": "fallthrough",
+      "id": 248103
+    },
+    {
+      "token": "fileprivate",
+      "id": 248104
+    },
+    {
+      "token": "#available",
+      "id": 248105
+    },
+    {
+      "token": "@keyframes",
+      "id": 248106
+    },
+    {
+      "token": "@namespace",
+      "id": 248107
+    },
+    {
+      "token": "ENTRYPOINT",
+      "id": 248108
+    },
+    {
+      "token": "STOPSIGNAL",
+      "id": 248109
+    },
+    {
+      "token": "__declspec",
+      "id": 248110
+    },
+    {
+      "token": "__fastcall",
+      "id": 248111
+    },
+    {
+      "token": "__future__",
+      "id": 248112
+    },
+    {
+      "token": "__inline__",
+      "id": 248113
+    },
+    {
+      "token": "__refvalue",
+      "id": 248114
+    },
+    {
+      "token": "__thiscall",
+      "id": 248115
+    },
+    {
+      "token": "_end_ident",
+      "id": 248116
+    },
+    {
+      "token": "_unaligned",
+      "id": 248117
+    },
+    {
+      "token": "baremodule",
+      "id": 248118
+    },
+    {
+      "token": "filter-out",
+      "id": 248119
+    },
+    {
+      "token": "findstring",
+      "id": 248120
+    },
+    {
+      "token": "instanceof",
+      "id": 248121
+    },
+    {
+      "token": "non-sealed",
+      "id": 248122
+    },
+    {
+      "token": "precedence",
+      "id": 248123
+    },
+    {
+      "token": "stackalloc",
+      "id": 248124
+    },
+    {
+      "token": "static get",
+      "id": 248125
+    },
+    {
+      "token": "transitive",
+      "id": 248126
+    },
+    {
+      "token": "#elifndef",
+      "id": 248127
+    },
+    {
+      "token": "#nullable",
+      "id": 248128
+    },
+    {
+      "token": "@supports",
+      "id": 248129
+    },
+    {
+      "token": "_Noreturn",
+      "id": 248130
+    },
+    {
+      "token": "__alignof",
+      "id": 248131
+    },
+    {
+      "token": "__clrcall",
+      "id": 248132
+    },
+    {
+      "token": "__finally",
+      "id": 248133
+    },
+    {
+      "token": "__makeref",
+      "id": 248134
+    },
+    {
+      "token": "__reftype",
+      "id": 248135
+    },
+    {
+      "token": "__stdcall",
+      "id": 248136
+    },
+    {
+      "token": "addprefix",
+      "id": 248137
+    },
+    {
+      "token": "addsuffix",
+      "id": 248138
+    },
+    {
+      "token": "canImport",
+      "id": 248139
+    },
+    {
+      "token": "co_return",
+      "id": 248140
+    },
+    {
+      "token": "companion",
+      "id": 248141
+    },
+    {
+      "token": "consteval",
+      "id": 248142
+    },
+    {
+      "token": "constinit",
+      "id": 248143
+    },
+    {
+      "token": "continue@",
+      "id": 248144
+    },
+    {
+      "token": "covariant",
+      "id": 248145
+    },
+    {
+      "token": "firstword",
+      "id": 248146
+    },
+    {
+      "token": "pat_param",
+      "id": 248147
+    },
+    {
+      "token": "satisfies",
+      "id": 248148
+    },
+    {
+      "token": "simulator",
+      "id": 248149
+    },
+    {
+      "token": "subscript",
+      "id": 248150
+    },
+    {
+      "token": "transient",
+      "id": 248151
+    },
+    {
+      "token": "typealias",
+      "id": 248152
+    },
+    {
+      "token": "unmanaged",
+      "id": 248153
+    },
+    {
+      "token": "#elifdef",
+      "id": 248154
+    },
+    {
+      "token": "#warning",
+      "id": 248155
+    },
+    {
+      "token": "-include",
+      "id": 248156
+    },
+    {
+      "token": "@charset",
+      "id": 248157
+    },
+    {
+      "token": "Fastcall",
+      "id": 248158
+    },
+    {
+      "token": "NA_real_",
+      "id": 248159
+    },
+    {
+      "token": "Thiscall",
+      "id": 248160
+    },
+    {
+      "token": "_Alignas",
+      "id": 248161
+    },
+    {
+      "token": "_Alignof",
+      "id": 248162
+    },
+    {
+      "token": "_Nonnull",
+      "id": 248163
+    },
+    {
+      "token": "__except",
+      "id": 248164
+    },
+    {
+      "token": "__inline",
+      "id": 248165
+    },
+    {
+      "token": "__thread",
+      "id": 248166
+    },
+    {
+      "token": "_alignof",
+      "id": 248167
+    },
+    {
+      "token": "accessor",
+      "id": 248168
+    },
+    {
+      "token": "anyclass",
+      "id": 248169
+    },
+    {
+      "token": "co_await",
+      "id": 248170
+    },
+    {
+      "token": "co_yield",
+      "id": 248171
+    },
+    {
+      "token": "debugger",
+      "id": 248172
+    },
+    {
+      "token": "deferred",
+      "id": 248173
+    },
+    {
+      "token": "defined?",
+      "id": 248174
+    },
+    {
+      "token": "deriving",
+      "id": 248175
+    },
+    {
+      "token": "exclave_",
+      "id": 248176
+    },
+    {
+      "token": "indirect",
+      "id": 248177
+    },
+    {
+      "token": "kind_of_",
+      "id": 248178
+    },
+    {
+      "token": "lastword",
+      "id": 248179
+    },
+    {
+      "token": "lateinit",
+      "id": 248180
+    },
+    {
+      "token": "noexcept",
+      "id": 248181
+    },
+    {
+      "token": "noinline",
+      "id": 248182
+    },
+    {
+      "token": "nonlocal",
+      "id": 248183
+    },
+    {
+      "token": "noreturn",
+      "id": 248184
+    },
+    {
+      "token": "patsubst",
+      "id": 248185
+    },
+    {
+      "token": "provides",
+      "id": 248186
+    },
+    {
+      "token": "realpath",
+      "id": 248187
+    },
+    {
+      "token": "rethrows",
+      "id": 248188
+    },
+    {
+      "token": "setparam",
+      "id": 248189
+    },
+    {
+      "token": "sinclude",
+      "id": 248190
+    },
+    {
+      "token": "strictfp",
+      "id": 248191
+    },
+    {
+      "token": "undefine",
+      "id": 248192
+    },
+    {
+      "token": "unexport",
+      "id": 248193
+    },
+    {
+      "token": "unsetenv",
+      "id": 248194
+    },
+    {
+      "token": "wildcard",
+      "id": 248195
+    },
+    {
+      "token": "wordlist",
+      "id": 248196
+    },
+    {
+      "token": "#elseif",
+      "id": 248197
+    },
+    {
+      "token": "@import",
+      "id": 248198
+    },
+    {
+      "token": "ONBUILD",
+      "id": 248199
+    },
+    {
+      "token": "Stdcall",
+      "id": 248200
+    },
+    {
+      "token": "WORKDIR",
+      "id": 248201
+    },
+    {
+      "token": "_Atomic",
+      "id": 248202
+    },
+    {
+      "token": "__asm__",
+      "id": 248203
+    },
+    {
+      "token": "__based",
+      "id": 248204
+    },
+    {
+      "token": "__cdecl",
+      "id": 248205
+    },
+    {
+      "token": "__leave",
+      "id": 248206
+    },
+    {
+      "token": "abspath",
+      "id": 248207
+    },
+    {
+      "token": "alignas",
+      "id": 248208
+    },
+    {
+      "token": "alignof",
+      "id": 248209
+    },
+    {
+      "token": "asserts",
+      "id": 248210
+    },
+    {
+      "token": "borrow_",
+      "id": 248211
+    },
+    {
+      "token": "derives",
+      "id": 248212
+    },
+    {
+      "token": "forSome",
+      "id": 248213
+    },
+    {
+      "token": "functor",
+      "id": 248214
+    },
+    {
+      "token": "global_",
+      "id": 248215
+    },
+    {
+      "token": "newtype",
+      "id": 248216
+    },
+    {
+      "token": "nominal",
+      "id": 248217
+    },
+    {
+      "token": "notnull",
+      "id": 248218
+    },
+    {
+      "token": "permits",
+      "id": 248219
+    },
+    {
+      "token": "phantom",
+      "id": 248220
+    },
+    {
+      "token": "postfix",
+      "id": 248221
+    },
+    {
+      "token": "reified",
+      "id": 248222
+    },
+    {
+      "token": "return@",
+      "id": 248223
+    },
+    {
+      "token": "tailrec",
+      "id": 248224
+    },
+    {
+      "token": "typeset",
+      "id": 248225
+    },
+    {
+      "token": "typevar",
+      "id": 248226
+    },
+    {
+      "token": "#false",
+      "id": 248227
+    },
+    {
+      "token": "@scope",
+      "id": 248228
+    },
+    {
+      "token": "EXPOSE",
+      "id": 248229
+    },
+    {
+      "token": "VOLUME",
+      "id": 248230
+    },
+    {
+      "token": "and_eq",
+      "id": 248231
+    },
+    {
+      "token": "async*",
+      "id": 248232
+    },
+    {
+      "token": "bitand",
+      "id": 248233
+    },
+    {
+      "token": "break@",
+      "id": 248234
+    },
+    {
+      "token": "deinit",
+      "id": 248235
+    },
+    {
+      "token": "downto",
+      "id": 248236
+    },
+    {
+      "token": "flavor",
+      "id": 248237
+    },
+    {
+      "token": "hiding",
+      "id": 248238
+    },
+    {
+      "token": "infixl",
+      "id": 248239
+    },
+    {
+      "token": "infixr",
+      "id": 248240
+    },
+    {
+      "token": "intcmp",
+      "id": 248241
+    },
+    {
+      "token": "is not",
+      "id": 248242
+    },
+    {
+      "token": "local_",
+      "id": 248243
+    },
+    {
+      "token": "nonrec",
+      "id": 248244
+    },
+    {
+      "token": "not in",
+      "id": 248245
+    },
+    {
+      "token": "not_eq",
+      "id": 248246
+    },
+    {
+      "token": "notdir",
+      "id": 248247
+    },
+    {
+      "token": "rescue",
+      "id": 248248
+    },
+    {
+      "token": "stack_",
+      "id": 248249
+    },
+    {
+      "token": "super@",
+      "id": 248250
+    },
+    {
+      "token": "vararg",
+      "id": 248251
+    },
+    {
+      "token": "x86_64",
+      "id": 248252
+    },
+    {
+      "token": "xor_eq",
+      "id": 248253
+    },
+    {
+      "token": "#true",
+      "id": 248254
+    },
+    {
+      "token": "Cdecl",
+      "id": 248255
+    },
+    {
+      "token": "SHELL",
+      "id": 248256
+    },
+    {
+      "token": "VPATH",
+      "id": 248257
+    },
+    {
+      "token": "__asm",
+      "id": 248258
+    },
+    {
+      "token": "__try",
+      "id": 248259
+    },
+    {
+      "token": "bitor",
+      "id": 248260
+    },
+    {
+      "token": "endef",
+      "id": 248261
+    },
+    {
+      "token": "guile",
+      "id": 248262
+    },
+    {
+      "token": "ifneq",
+      "id": 248263
+    },
+    {
+      "token": "infix",
+      "id": 248264
+    },
+    {
+      "token": "keyof",
+      "id": 248265
+    },
+    {
+      "token": "kind_",
+      "id": 248266
+    },
+    {
+      "token": "mixin",
+      "id": 248267
+    },
+    {
+      "token": "or_eq",
+      "id": 248268
+    },
+    {
+      "token": "sync*",
+      "id": 248269
+    },
+    {
+      "token": "this@",
+      "id": 248270
+    },
+    {
+      "token": "vpath",
+      "id": 248271
+    },
+    {
+      "token": "(?P<",
+      "id": 248272
+    },
+    {
+      "token": "(?P=",
+      "id": 248273
+    },
+    {
+      "token": "/udp",
+      "id": 248274
+    },
+    {
+      "token": ">>>=",
+      "id": 248275
+    },
+    {
+      "token": "[@@@",
+      "id": 248276
+    },
+    {
+      "token": "esac",
+      "id": 248277
+    },
+    {
+      "token": "i386",
+      "id": 248278
+    },
+    {
+      "token": "ifeq",
+      "id": 248279
+    },
+    {
+      "token": "lxor",
+      "id": 248280
+    },
+    {
+      "token": "r\"\"\"",
+      "id": 248281
+    },
+    {
+      "token": "r'''",
+      "id": 248282
+    },
+    {
+      "token": "u8R\"",
+      "id": 248283
+    },
+    {
+      "token": "$((",
+      "id": 248284
+    },
+    {
+      "token": "%i(",
+      "id": 248285
+    },
+    {
+      "token": "%w(",
+      "id": 248286
+    },
+    {
+      "token": "&&&",
+      "id": 248287
+    },
+    {
+      "token": "&&=",
+      "id": 248288
+    },
+    {
+      "token": "&>>",
+      "id": 248289
+    },
+    {
+      "token": "&^=",
+      "id": 248290
+    },
+    {
+      "token": "(?<",
+      "id": 248291
+    },
+    {
+      "token": "**=",
+      "id": 248292
+    },
+    {
+      "token": "+?:",
+      "id": 248293
+    },
+    {
+      "token": "->*",
+      "id": 248294
+    },
+    {
+      "token": "->.",
+      "id": 248295
+    },
+    {
+      "token": "->>",
+      "id": 248296
+    },
+    {
+      "token": "-?:",
+      "id": 248297
+    },
+    {
+      "token": "..=",
+      "id": 248298
+    },
+    {
+      "token": ":::",
+      "id": 248299
+    },
+    {
+      "token": "::=",
+      "id": 248300
+    },
+    {
+      "token": ";;&",
+      "id": 248301
+    },
+    {
+      "token": "<&-",
+      "id": 248302
+    },
+    {
+      "token": "<<-",
+      "id": 248303
+    },
+    {
+      "token": "<<=",
+      "id": 248304
+    },
+    {
+      "token": "<<~",
+      "id": 248305
+    },
+    {
+      "token": "<=>",
+      "id": 248306
+    },
+    {
+      "token": "<|>",
+      "id": 248307
+    },
+    {
+      "token": "<~>",
+      "id": 248308
+    },
+    {
+      "token": "=>>",
+      "id": 248309
+    },
+    {
+      "token": ">&-",
+      "id": 248310
+    },
+    {
+      "token": ">>=",
+      "id": 248311
+    },
+    {
+      "token": "?->",
+      "id": 248312
+    },
+    {
+      "token": "?..",
+      "id": 248313
+    },
+    {
+      "token": "?=>",
+      "id": 248314
+    },
+    {
+      "token": "??=",
+      "id": 248315
+    },
+    {
+      "token": "LR\"",
+      "id": 248316
+    },
+    {
+      "token": "UR\"",
+      "id": 248317
+    },
+    {
+      "token": "[%%",
+      "id": 248318
+    },
+    {
+      "token": "[@@",
+      "id": 248319
+    },
+    {
+      "token": "]]>",
+      "id": 248320
+    },
+    {
+      "token": "^^^",
+      "id": 248321
+    },
+    {
+      "token": "as?",
+      "id": 248322
+    },
+    {
+      "token": "asr",
+      "id": 248323
+    },
+    {
+      "token": "lsl",
+      "id": 248324
+    },
+    {
+      "token": "lsr",
+      "id": 248325
+    },
+    {
+      "token": "mdo",
+      "id": 248326
+    },
+    {
+      "token": "u8\"",
+      "id": 248327
+    },
+    {
+      "token": "u8'",
+      "id": 248328
+    },
+    {
+      "token": "uR\"",
+      "id": 248329
+    },
+    {
+      "token": "{%%",
+      "id": 248330
+    },
+    {
+      "token": "||=",
+      "id": 248331
+    },
+    {
+      "token": "||]",
+      "id": 248332
+    },
+    {
+      "token": "|||",
+      "id": 248333
+    },
+    {
+      "token": "~/=",
+      "id": 248334
+    },
+    {
+      "token": "~>>",
+      "id": 248335
+    },
+    {
+      "token": "~~~",
+      "id": 248336
+    },
+    {
+      "token": "!~",
+      "id": 248337
+    },
+    {
+      "token": "#(",
+      "id": 248338
+    },
+    {
+      "token": "#)",
+      "id": 248339
+    },
+    {
+      "token": "$=",
+      "id": 248340
+    },
+    {
+      "token": "$[",
+      "id": 248341
+    },
+    {
+      "token": "$`",
+      "id": 248342
+    },
+    {
+      "token": "&.",
+      "id": 248343
+    },
+    {
+      "token": "&:",
+      "id": 248344
+    },
+    {
+      "token": "&=",
+      "id": 248345
+    },
+    {
+      "token": "&>",
+      "id": 248346
+    },
+    {
+      "token": "&^",
+      "id": 248347
+    },
+    {
+      "token": "+@",
+      "id": 248348
+    },
+    {
+      "token": "-@",
+      "id": 248349
+    },
+    {
+      "token": "<%",
+      "id": 248350
+    },
+    {
+      "token": "<:",
+      "id": 248351
+    },
+    {
+      "token": "<~",
+      "id": 248352
+    },
+    {
+      "token": "@=",
+      "id": 248353
+    },
+    {
+      "token": "L\"",
+      "id": 248354
+    },
+    {
+      "token": "L'",
+      "id": 248355
+    },
+    {
+      "token": "R\"",
+      "id": 248356
+    },
+    {
+      "token": "U\"",
+      "id": 248357
+    },
+    {
+      "token": "U'",
+      "id": 248358
+    },
+    {
+      "token": "[<",
+      "id": 248359
+    },
+    {
+      "token": "[>",
+      "id": 248360
+    },
+    {
+      "token": "[|",
+      "id": 248361
+    },
+    {
+      "token": "\\ ",
+      "id": 248362
+    },
+    {
+      "token": "\\k",
+      "id": 248363
+    },
+    {
+      "token": "\\{",
+      "id": 248364
+    },
+    {
+      "token": "^=",
+      "id": 248365
+    },
+    {
+      "token": "r\"",
+      "id": 248366
+    },
+    {
+      "token": "r'",
+      "id": 248367
+    },
+    {
+      "token": "u\"",
+      "id": 248368
+    },
+    {
+      "token": "u'",
+      "id": 248369
+    },
+    {
+      "token": "{<",
+      "id": 248370
+    },
+    {
+      "token": "|&",
+      "id": 248371
+    },
+    {
+      "token": "|>",
+      "id": 248372
+    },
+    {
+      "token": "|]",
+      "id": 248373
+    },
+    {
+      "token": "|}",
+      "id": 248374
+    },
+    {
+      "token": "~>",
+      "id": 248375
+    },
+    {
+      "token": "~@",
+      "id": 248376
+    },
+    {
+      "token": "\u0000",
+      "id": 248377
+    },
+    {
+      "token": "\t",
+      "id": 248378
+    },
+    {
+      "token": "\n",
+      "id": 248379
+    },
+    {
+      "token": "←",
+      "id": 248380
+    },
+    {
+      "token": "→",
+      "id": 248381
+    },
+    {
+      "token": "⇒",
+      "id": 248382
+    },
+    {
+      "token": "∀",
+      "id": 248383
+    },
+    {
+      "token": "∷",
+      "id": 248384
+    },
+    {
+      "token": "⊸",
+      "id": 248385
+    },
+    {
+      "token": "★",
+      "id": 248386
+    },
+    {
+      "token": "⟦",
+      "id": 248387
+    },
+    {
+      "token": "⟧",
+      "id": 248388
+    }
+  ]
+}

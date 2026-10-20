@@ -40,6 +40,8 @@ class Args:
     lora_dropout: float = 0.05
     lora_bias: bool = False
     bias: Literal["none", "all", "lora_only"] = "none"
+    trainable_tokens: bool = False
+    token_extension_report: str | Path | None = None
     lora_target_modules: list[str] | None = field(
         default_factory=lambda: [
             "q_proj",
@@ -166,6 +168,40 @@ def load_tokenizer(tokenizer_id: str):
     return tokenizer
 
 
+def get_trainable_tokens(args: Args):
+    if not args.trainable_tokens and args.token_extension_report is None:
+        return None
+
+    if args.trainable_tokens and args.token_extension_report is None:
+        raise ValueError(
+            f"Trainable tokens flag is activated, but extension_report path is not provided."
+        )
+
+    token_extension_report_path = args.token_extension_report
+    if token_extension_report_path is None:
+        if args.tokenizer_id is None:
+            raise ValueError(f"Provide valid extended tokenizer report path")
+        else:
+            token_extension_report_path = (
+                Path(args.tokenizer_id) / "extension_report.json"
+            )
+    else:
+        token_extension_report_path = Path(token_extension_report_path)
+
+    if not Path(token_extension_report_path).exists():
+        raise FileNotFoundError(
+            f"Token extension report path is either invalid or doesnt exists."
+        )
+
+    with token_extension_report_path.open(encoding="utf-8") as f:
+        report = json.load(f)
+
+    added_tokens = report["added_tokens"]
+    new_token_ids = [item["id"] for item in added_tokens]
+
+    return new_token_ids
+
+
 def process_example(example: dict):
     for message in example.get("messages", []):
         for tool_call in message.get("tool_calls") or []:
@@ -216,12 +252,22 @@ def load_datasets(
     return train_dataset, test_dataset
 
 
-def get_model(model_id, quantization_config=None, **kwargs):
+def get_model(
+    model_id,
+    tokenizer,
+    resize_model_embeds=False,
+    quantization_config=None,
+    **kwargs,
+):
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
         quantization_config=quantization_config,
         **kwargs,
     )
+
+    if resize_model_embeds:
+        model.resize_token_embeddings(len(tokenizer), pad_to_multiple_of=8)
+
     return model
 
 
@@ -326,9 +372,7 @@ def run(
         processing_class=tokenizer,
     )
 
-    trainer.train(
-        resume_from_checkpoint=args.resume_from_checkpoint
-    )
+    trainer.train(resume_from_checkpoint=args.resume_from_checkpoint)
 
     output_dir = Path(args.output_dir)
     adapter_dir = output_dir / "final_adapter"
@@ -344,12 +388,15 @@ def run(
 
 
 def main(args: Args):
-    configure_wandb(args)
+    if args.report_to == "wandb":
+        configure_wandb(args)
 
     model_id = args.model_id
 
     tokenizer_id = args.tokenizer_id or model_id
     tokenizer = load_tokenizer(tokenizer_id)
+
+    new_tokens = get_trainable_tokens(args)
 
     train_dataset, test_dataset = load_datasets(
         seed=args.seed,
@@ -369,6 +416,10 @@ def main(args: Args):
         lora_target_modules=args.lora_target_modules,
     )
 
+    resize_model_embeds = False
+    if new_tokens and len(new_tokens):
+        resize_model_embeds = True
+
     if args.load_in_4bit:
         quantization_config = get_quantization_config(
             load_in_4bit=args.load_in_4bit,
@@ -379,17 +430,34 @@ def main(args: Args):
 
         model = get_model(
             model_id=model_id,
+            tokenizer=tokenizer,
+            resize_model_embeds=resize_model_embeds,
             quantization_config=quantization_config,
             device_map={"": 0},
         )
         model = prepare_model_for_kbit_training(model)
     else:
         model = get_model(
-            model_id,
+            model_id=model_id,
+            tokenizer=tokenizer,
+            resize_model_embeds=resize_model_embeds,
             torch_dtype=torch.bfloat16,
             device_map={"": 0},
             attn_implementation="sdpa",
         )
+    
+    input_embeddings = model.get_input_embeddings()
+    output_embeddings = model.get_output_embeddings()
+
+    print("Input embedding shape:", input_embeddings.weight.shape)
+    print("Output embedding shape:", output_embeddings.weight.shape)
+    print("Tied embeddings:", model.config.tie_word_embeddings)
+
+    for name, module in model.named_modules():
+        if module is input_embeddings or module is output_embeddings:
+            print("Embedding module:", name)
+    
+    return
 
     model = get_peft_model(model, peft_config)
     model.config.use_cache = False
@@ -419,3 +487,5 @@ if __name__ == "__main__":
     args = tyro.cli(Args)
 
     main(args)
+
+    # python post-training/finetune.py --resume-from-checkpoint output/checkpoint-500 --no-load-in-4bit --per_device_train_batch_size 2 --gradient_accumulation_steps 8 --per_device_eval_batch_size 1
