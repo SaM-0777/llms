@@ -172,11 +172,6 @@ def get_trainable_tokens(args: Args):
     if not args.trainable_tokens and args.token_extension_report is None:
         return None
 
-    if args.trainable_tokens and args.token_extension_report is None:
-        raise ValueError(
-            f"Trainable tokens flag is activated, but extension_report path is not provided."
-        )
-
     token_extension_report_path = args.token_extension_report
     if token_extension_report_path is None:
         if args.tokenizer_id is None:
@@ -278,7 +273,14 @@ def get_peft_config(
     dropout: float = 0.05,
     lora_bias: bool = False,
     bias: Literal["none", "all", "lora_only"] = "none",
+    new_token_ids: list[int] | None = None,
 ):
+    trainable_token_indices = None
+    if new_token_ids:
+        trainable_token_indices = {
+            "model.embed_tokens": new_token_ids,
+        }
+
     peft_config = LoraConfig(
         r=r,
         lora_alpha=lora_alpha,
@@ -287,6 +289,7 @@ def get_peft_config(
         bias=bias,
         target_modules=lora_target_modules,
         task_type=TaskType.CAUSAL_LM,
+        trainable_token_indices=trainable_token_indices,
     )
 
     return peft_config
@@ -396,7 +399,7 @@ def main(args: Args):
     tokenizer_id = args.tokenizer_id or model_id
     tokenizer = load_tokenizer(tokenizer_id)
 
-    new_tokens = get_trainable_tokens(args)
+    new_token_ids = get_trainable_tokens(args)
 
     train_dataset, test_dataset = load_datasets(
         seed=args.seed,
@@ -414,10 +417,11 @@ def main(args: Args):
         dropout=args.lora_dropout,
         bias=args.bias,
         lora_target_modules=args.lora_target_modules,
+        new_token_ids=new_token_ids,
     )
 
     resize_model_embeds = False
-    if new_tokens and len(new_tokens):
+    if new_token_ids and len(new_token_ids):
         resize_model_embeds = True
 
     if args.load_in_4bit:
@@ -445,19 +449,6 @@ def main(args: Args):
             device_map={"": 0},
             attn_implementation="sdpa",
         )
-    
-    input_embeddings = model.get_input_embeddings()
-    output_embeddings = model.get_output_embeddings()
-
-    print("Input embedding shape:", input_embeddings.weight.shape)
-    print("Output embedding shape:", output_embeddings.weight.shape)
-    print("Tied embeddings:", model.config.tie_word_embeddings)
-
-    for name, module in model.named_modules():
-        if module is input_embeddings or module is output_embeddings:
-            print("Embedding module:", name)
-    
-    return
 
     model = get_peft_model(model, peft_config)
     model.config.use_cache = False
@@ -489,3 +480,4 @@ if __name__ == "__main__":
     main(args)
 
     # python post-training/finetune.py --resume-from-checkpoint output/checkpoint-500 --no-load-in-4bit --per_device_train_batch_size 2 --gradient_accumulation_steps 8 --per_device_eval_batch_size 1
+    # python post-training/finetune.py --tokenizer_id "tokenizer/Qwen35-4B-vocab-extended" --trainable_tokens --output_dir extended_vocab_output --no-load-in-4bit --per_device_train_batch_size 2 --gradient_accumulation_steps 8 --per_device_eval_batch_size 1
