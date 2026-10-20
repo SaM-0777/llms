@@ -62,6 +62,7 @@ class Args:
     bnb_4bit_compute_dtype: Literal["bfloat16", "float16"] = "bfloat16"
 
     output_dir: str | Path = "output"
+    resume_from_checkpoint: str | None = None
     num_train_epochs: float = 2.0
     per_device_train_batch_size: int = 16
     per_device_eval_batch_size: int = 4
@@ -325,7 +326,9 @@ def run(
         processing_class=tokenizer,
     )
 
-    trainer.train()
+    trainer.train(
+        resume_from_checkpoint=args.resume_from_checkpoint
+    )
 
     output_dir = Path(args.output_dir)
     adapter_dir = output_dir / "final_adapter"
