@@ -356,6 +356,8 @@ def get_sft_config(args: Args) -> SFTConfig:
         dataloader_num_workers=4,
         dataloader_persistent_workers=True,
         dataloader_prefetch_factor=2,
+        
+        loss_type="nll",
     )
 
 
@@ -453,6 +455,10 @@ def main(args: Args):
 
     model = get_peft_model(model, peft_config)
     model.config.use_cache = False
+    
+    eos_ids = [248046, 248044]
+    model.config.eos_token_id = eos_ids
+    model.generation_config.eos_token_id = eos_ids
 
     trainer = run(
         model=model,
