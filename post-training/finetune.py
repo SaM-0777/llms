@@ -63,9 +63,9 @@ class Args:
 
     output_dir: str | Path = "output"
     num_train_epochs: float = 2.0
-    per_device_train_batch_size: int = 1
-    per_device_eval_batch_size: int = 1
-    gradient_accumulation_steps: int = 8
+    per_device_train_batch_size: int = 32
+    per_device_eval_batch_size: int = 4
+    gradient_accumulation_steps: int = 1
     learning_rate: float = 2e-4
     weight_decay: float = 0.01
     warmup_steps: float = 250
@@ -80,7 +80,7 @@ class Args:
     metric_for_best_model: str = "eval_loss"
     greater_is_better: bool = False
     max_seq_length: int = 4096
-    gradient_checkpointing: bool = True
+    gradient_checkpointing: bool = False
     report_to: str = "wandb"
     project_name: str = "Qwen3.5-4B_SWE"
     run_name: str | None = None
@@ -269,6 +269,9 @@ def get_sft_config(args: Args) -> SFTConfig:
     return SFTConfig(
         output_dir=str(args.output_dir),
         # Training
+        bf16=True,
+        tf32=True,
+        optim="adamw_torch_fused",
         num_train_epochs=args.num_train_epochs,
         per_device_train_batch_size=args.per_device_train_batch_size,
         gradient_accumulation_steps=args.gradient_accumulation_steps,
