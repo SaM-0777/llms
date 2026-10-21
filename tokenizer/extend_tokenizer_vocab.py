@@ -180,17 +180,29 @@ def main():
 
     print(f"Original vocabulary size: {original_vocab_size}")
 
-    # 3. Find strings that are not already vocabulary entries.
+    # 3. Keep only strings that require more than one base token.
     missing_tokens = [token for token in tokens if token not in original_vocab]
+
+    single_token_strings = [
+        token
+        for token in missing_tokens
+        if len(tokenizer.encode(token, add_special_tokens=False)) == 1
+    ]
+    missing_tokens = [
+        token
+        for token in missing_tokens
+        if len(tokenizer.encode(token, add_special_tokens=False)) > 1
+    ]
 
     existing_tokens = len(tokens) - len(missing_tokens)
 
     print(f"Strings already in vocabulary: {existing_tokens}")
-    print(f"Missing strings to add: {len(missing_tokens)}")
+    print(f"Already represented by one base token: {len(single_token_strings)}")
+    print(f"New multi-token strings to add: {len(missing_tokens)}")
 
     # 4. Add only missing strings with category-aware matching properties.
     # Hugging Face assigns new IDs without renumbering existing IDs.
-    missing_tokens, added_count = add_missing_lexical_tokens(tokenizer, tokens)
+    missing_tokens, added_count = add_missing_lexical_tokens(tokenizer, missing_tokens)
 
     if added_count != len(missing_tokens):
         raise RuntimeError(
@@ -233,7 +245,7 @@ def main():
         )
 
     # 7. Install lexical matching before the original pre-tokenizer.
-    lexical_pattern = install_lexical_matcher(tokenizer, tokens)
+    lexical_pattern = install_lexical_matcher(tokenizer, missing_tokens)
 
     if model_fingerprint(tokenizer) != original_model_fingerprint:
         raise RuntimeError("The official BPE model changed during extension.")
@@ -251,6 +263,7 @@ def main():
         "extended_vocabulary_size": len(tokenizer),
         "lexical_strings_loaded": len(tokens),
         "strings_already_in_vocabulary": existing_tokens,
+        "strings_already_one_base_token": len(single_token_strings),
         "new_tokens_added": added_count,
         "existing_token_ids_preserved": True,
         "all_added_tokens_encode_as_single_token": True,

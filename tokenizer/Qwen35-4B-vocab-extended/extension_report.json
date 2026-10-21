@@ -3,16 +3,17 @@
   "input_json": "tokenizer/notation_lexicals_II.json",
   "output_directory": "tokenizer/Qwen35-4B-vocab-extended",
   "original_vocabulary_size": 248077,
-  "extended_vocabulary_size": 248389,
-  "lexical_strings_loaded": 816,
-  "strings_already_in_vocabulary": 504,
-  "new_tokens_added": 312,
+  "extended_vocabulary_size": 248353,
+  "lexical_strings_loaded": 724,
+  "strings_already_in_vocabulary": 448,
+  "strings_already_one_base_token": 4,
+  "new_tokens_added": 276,
   "existing_token_ids_preserved": true,
   "all_added_tokens_encode_as_single_token": true,
   "lexical_matching": {
     "strategy": "boundary-aware lexical split followed by the original pre-tokenizer",
     "longest_match_first": true,
-    "lexical_regex_length": 5088,
+    "lexical_regex_length": 2216,
     "base_bpe_model_sha256": "028a8aa14a411ea601bbc7c9a88b232f3eeab0d4f6b0702a746b10e5cc45c365",
     "extended_bpe_model_sha256": "028a8aa14a411ea601bbc7c9a88b232f3eeab0d4f6b0702a746b10e5cc45c365",
     "original_pre_tokenizer": {
@@ -737,552 +738,408 @@
       "id": 248251
     },
     {
-      "token": "x86_64",
+      "token": "xor_eq",
       "id": 248252
     },
     {
-      "token": "xor_eq",
+      "token": "#true",
       "id": 248253
     },
     {
-      "token": "#true",
+      "token": "Cdecl",
       "id": 248254
     },
     {
-      "token": "Cdecl",
+      "token": "SHELL",
       "id": 248255
     },
     {
-      "token": "SHELL",
+      "token": "VPATH",
       "id": 248256
     },
     {
-      "token": "VPATH",
+      "token": "__asm",
       "id": 248257
     },
     {
-      "token": "__asm",
+      "token": "__try",
       "id": 248258
     },
     {
-      "token": "__try",
+      "token": "bitor",
       "id": 248259
     },
     {
-      "token": "bitor",
+      "token": "endef",
       "id": 248260
     },
     {
-      "token": "endef",
+      "token": "guile",
       "id": 248261
     },
     {
-      "token": "guile",
+      "token": "ifneq",
       "id": 248262
     },
     {
-      "token": "ifneq",
+      "token": "infix",
       "id": 248263
     },
     {
-      "token": "infix",
+      "token": "keyof",
       "id": 248264
     },
     {
-      "token": "keyof",
+      "token": "kind_",
       "id": 248265
     },
     {
-      "token": "kind_",
+      "token": "mixin",
       "id": 248266
     },
     {
-      "token": "mixin",
+      "token": "or_eq",
       "id": 248267
     },
     {
-      "token": "or_eq",
+      "token": "sync*",
       "id": 248268
     },
     {
-      "token": "sync*",
+      "token": "this@",
       "id": 248269
     },
     {
-      "token": "this@",
+      "token": "vpath",
       "id": 248270
     },
     {
-      "token": "vpath",
+      "token": "(?P<",
       "id": 248271
     },
     {
-      "token": "(?P<",
+      "token": "(?P=",
       "id": 248272
     },
     {
-      "token": "(?P=",
+      "token": "/udp",
       "id": 248273
     },
     {
-      "token": "/udp",
+      "token": ">>>=",
       "id": 248274
     },
     {
-      "token": ">>>=",
+      "token": "[@@@",
       "id": 248275
     },
     {
-      "token": "[@@@",
+      "token": "esac",
       "id": 248276
     },
     {
-      "token": "esac",
+      "token": "ifeq",
       "id": 248277
     },
     {
-      "token": "i386",
+      "token": "lxor",
       "id": 248278
     },
     {
-      "token": "ifeq",
+      "token": "$((",
       "id": 248279
     },
     {
-      "token": "lxor",
+      "token": "%w(",
       "id": 248280
     },
     {
-      "token": "r\"\"\"",
+      "token": "&&&",
       "id": 248281
     },
     {
-      "token": "r'''",
+      "token": "&&=",
       "id": 248282
     },
     {
-      "token": "u8R\"",
+      "token": "&>>",
       "id": 248283
     },
     {
-      "token": "$((",
+      "token": "&^=",
       "id": 248284
     },
     {
-      "token": "%i(",
+      "token": "(?<",
       "id": 248285
     },
     {
-      "token": "%w(",
+      "token": "**=",
       "id": 248286
     },
     {
-      "token": "&&&",
+      "token": "+?:",
       "id": 248287
     },
     {
-      "token": "&&=",
+      "token": "->*",
       "id": 248288
     },
     {
-      "token": "&>>",
+      "token": "->.",
       "id": 248289
     },
     {
-      "token": "&^=",
+      "token": "->>",
       "id": 248290
     },
     {
-      "token": "(?<",
+      "token": "-?:",
       "id": 248291
     },
     {
-      "token": "**=",
+      "token": "..=",
       "id": 248292
     },
     {
-      "token": "+?:",
+      "token": ":::",
       "id": 248293
     },
     {
-      "token": "->*",
+      "token": "::=",
       "id": 248294
     },
     {
-      "token": "->.",
+      "token": ";;&",
       "id": 248295
     },
     {
-      "token": "->>",
+      "token": "<&-",
       "id": 248296
     },
     {
-      "token": "-?:",
+      "token": "<<-",
       "id": 248297
     },
     {
-      "token": "..=",
+      "token": "<<=",
       "id": 248298
     },
     {
-      "token": ":::",
+      "token": "<<~",
       "id": 248299
     },
     {
-      "token": "::=",
+      "token": "<=>",
       "id": 248300
     },
     {
-      "token": ";;&",
+      "token": "<|>",
       "id": 248301
     },
     {
-      "token": "<&-",
+      "token": "<~>",
       "id": 248302
     },
     {
-      "token": "<<-",
+      "token": "=>>",
       "id": 248303
     },
     {
-      "token": "<<=",
+      "token": ">&-",
       "id": 248304
     },
     {
-      "token": "<<~",
+      "token": ">>=",
       "id": 248305
     },
     {
-      "token": "<=>",
+      "token": "?->",
       "id": 248306
     },
     {
-      "token": "<|>",
+      "token": "?..",
       "id": 248307
     },
     {
-      "token": "<~>",
+      "token": "?=>",
       "id": 248308
     },
     {
-      "token": "=>>",
+      "token": "??=",
       "id": 248309
     },
     {
-      "token": ">&-",
+      "token": "[%%",
       "id": 248310
     },
     {
-      "token": ">>=",
+      "token": "[@@",
       "id": 248311
     },
     {
-      "token": "?->",
+      "token": "]]>",
       "id": 248312
     },
     {
-      "token": "?..",
+      "token": "^^^",
       "id": 248313
     },
     {
-      "token": "?=>",
+      "token": "as?",
       "id": 248314
     },
     {
-      "token": "??=",
+      "token": "asr",
       "id": 248315
     },
     {
-      "token": "LR\"",
+      "token": "lsl",
       "id": 248316
     },
     {
-      "token": "UR\"",
+      "token": "lsr",
       "id": 248317
     },
     {
-      "token": "[%%",
+      "token": "mdo",
       "id": 248318
     },
     {
-      "token": "[@@",
+      "token": "{%%",
       "id": 248319
     },
     {
-      "token": "]]>",
+      "token": "||=",
       "id": 248320
     },
     {
-      "token": "^^^",
+      "token": "||]",
       "id": 248321
     },
     {
-      "token": "as?",
+      "token": "|||",
       "id": 248322
     },
     {
-      "token": "asr",
+      "token": "~/=",
       "id": 248323
     },
     {
-      "token": "lsl",
+      "token": "~>>",
       "id": 248324
     },
     {
-      "token": "lsr",
+      "token": "~~~",
       "id": 248325
     },
     {
-      "token": "mdo",
+      "token": "!~",
       "id": 248326
     },
     {
-      "token": "u8\"",
+      "token": "#(",
       "id": 248327
     },
     {
-      "token": "u8'",
+      "token": "#)",
       "id": 248328
     },
     {
-      "token": "uR\"",
+      "token": "$=",
       "id": 248329
     },
     {
-      "token": "{%%",
+      "token": "$[",
       "id": 248330
     },
     {
-      "token": "||=",
+      "token": "&.",
       "id": 248331
     },
     {
-      "token": "||]",
+      "token": "&:",
       "id": 248332
     },
     {
-      "token": "|||",
+      "token": "&=",
       "id": 248333
     },
     {
-      "token": "~/=",
+      "token": "&>",
       "id": 248334
     },
     {
-      "token": "~>>",
+      "token": "&^",
       "id": 248335
     },
     {
-      "token": "~~~",
+      "token": "+@",
       "id": 248336
     },
     {
-      "token": "!~",
+      "token": "-@",
       "id": 248337
     },
     {
-      "token": "#(",
+      "token": "<%",
       "id": 248338
     },
     {
-      "token": "#)",
+      "token": "<:",
       "id": 248339
     },
     {
-      "token": "$=",
+      "token": "<~",
       "id": 248340
     },
     {
-      "token": "$[",
+      "token": "@=",
       "id": 248341
     },
     {
-      "token": "$`",
+      "token": "[<",
       "id": 248342
     },
     {
-      "token": "&.",
+      "token": "[>",
       "id": 248343
     },
     {
-      "token": "&:",
+      "token": "[|",
       "id": 248344
     },
     {
-      "token": "&=",
+      "token": "^=",
       "id": 248345
     },
     {
-      "token": "&>",
+      "token": "{<",
       "id": 248346
     },
     {
-      "token": "&^",
+      "token": "|&",
       "id": 248347
     },
     {
-      "token": "+@",
+      "token": "|>",
       "id": 248348
     },
     {
-      "token": "-@",
+      "token": "|]",
       "id": 248349
     },
     {
-      "token": "<%",
+      "token": "|}",
       "id": 248350
     },
     {
-      "token": "<:",
+      "token": "~>",
       "id": 248351
     },
     {
-      "token": "<~",
-      "id": 248352
-    },
-    {
-      "token": "@=",
-      "id": 248353
-    },
-    {
-      "token": "L\"",
-      "id": 248354
-    },
-    {
-      "token": "L'",
-      "id": 248355
-    },
-    {
-      "token": "R\"",
-      "id": 248356
-    },
-    {
-      "token": "U\"",
-      "id": 248357
-    },
-    {
-      "token": "U'",
-      "id": 248358
-    },
-    {
-      "token": "[<",
-      "id": 248359
-    },
-    {
-      "token": "[>",
-      "id": 248360
-    },
-    {
-      "token": "[|",
-      "id": 248361
-    },
-    {
-      "token": "\\ ",
-      "id": 248362
-    },
-    {
-      "token": "\\k",
-      "id": 248363
-    },
-    {
-      "token": "\\{",
-      "id": 248364
-    },
-    {
-      "token": "^=",
-      "id": 248365
-    },
-    {
-      "token": "r\"",
-      "id": 248366
-    },
-    {
-      "token": "r'",
-      "id": 248367
-    },
-    {
-      "token": "u\"",
-      "id": 248368
-    },
-    {
-      "token": "u'",
-      "id": 248369
-    },
-    {
-      "token": "{<",
-      "id": 248370
-    },
-    {
-      "token": "|&",
-      "id": 248371
-    },
-    {
-      "token": "|>",
-      "id": 248372
-    },
-    {
-      "token": "|]",
-      "id": 248373
-    },
-    {
-      "token": "|}",
-      "id": 248374
-    },
-    {
-      "token": "~>",
-      "id": 248375
-    },
-    {
       "token": "~@",
-      "id": 248376
-    },
-    {
-      "token": "\u0000",
-      "id": 248377
-    },
-    {
-      "token": "\t",
-      "id": 248378
-    },
-    {
-      "token": "\n",
-      "id": 248379
-    },
-    {
-      "token": "←",
-      "id": 248380
-    },
-    {
-      "token": "→",
-      "id": 248381
-    },
-    {
-      "token": "⇒",
-      "id": 248382
-    },
-    {
-      "token": "∀",
-      "id": 248383
-    },
-    {
-      "token": "∷",
-      "id": 248384
-    },
-    {
-      "token": "⊸",
-      "id": 248385
-    },
-    {
-      "token": "★",
-      "id": 248386
-    },
-    {
-      "token": "⟦",
-      "id": 248387
-    },
-    {
-      "token": "⟧",
-      "id": 248388
+      "id": 248352
     }
   ]
 }

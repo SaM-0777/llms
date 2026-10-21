@@ -334,6 +334,7 @@ def get_sft_config(args: Args) -> SFTConfig:
     return SFTConfig(
         output_dir=str(args.output_dir),
         # Training
+        torch_compile=True,
         bf16=True,
         tf32=True,
         optim="adamw_torch_fused",
@@ -454,6 +455,8 @@ def main(args: Args):
             tokenizer=tokenizer,
             resize_model_embeds=resize_model_embeds,
             quantization_config=quantization_config,
+            torch_dtype=torch.bfloat16,
+            attn_implementation="sdpa",
             device_map={"": 0},
         )
         model = prepare_model_for_kbit_training(model)
@@ -501,4 +504,4 @@ if __name__ == "__main__":
     main(args)
 
     # python post-training/finetune.py --resume-from-checkpoint output/checkpoint-500 --no-load-in-4bit --per_device_train_batch_size 2 --gradient_accumulation_steps 8 --per_device_eval_batch_size 1
-    # python post-training/finetune.py --tokenizer_id "tokenizer/Qwen35-4B-vocab-extended" --trainable_tokens --output_dir extended_vocab_output --no-load-in-4bit --per_device_train_batch_size 2 --gradient_accumulation_steps 8 --per_device_eval_batch_size 1
+    # python post-training/finetune.py --tokenizer_id "tokenizer/Qwen35-4B-vocab-extended" --trainable_tokens --output_dir extended_vocab_output --no-load-in-4bit --per_device_train_batch_size 1 --gradient_accumulation_steps 16 --per_device_eval_batch_size 1
