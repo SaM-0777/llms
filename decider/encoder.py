@@ -5,7 +5,7 @@ from typing import Any
 
 import torch
 
-from decider.types import Content, DecisionInput, Question
+from decider.types import Answer, Content, DecisionInput, Question
 
 MAX_OPTIONS = 255
 MARKER = "<|fim_suffix|>"
@@ -59,10 +59,17 @@ class Encoded:
 
     keys: tuple[str, ...]
     counts: tuple[int, ...]  # option count of each question
+
+    option_keys: tuple[tuple[str, ...], ...]
+
     input_ids: torch.Tensor
     markers: (
         torch.Tensor
     )  # positions of the readout markers, one per question, in question order
+
+    targets: tuple[tuple[float, ...], ...]
+    labels: tuple[int, ...]
+
     mm_token_type_ids: torch.Tensor | None = None
     pixel_values: torch.Tensor | None = None
     image_grid_thw: torch.Tensor | None = None
@@ -124,6 +131,37 @@ class Encoder:
                     f"Question {key!r}: a score needs at least two ordered levels"
                 )
 
+    def target_and_label(
+        self,
+        question: Question,
+        answer: Answer,
+    ) -> tuple[tuple[str, ...], tuple[float, ...], int]:
+        option_keys_list, _ = options(question)
+        option_keys = tuple(option_keys_list)
+
+        try:
+            probabilities = tuple(
+                float(answer["probabilities"][option_key]) for option_key in option_keys
+            )
+        except KeyError as exc:
+            raise RequestError(
+                f"Gold probabilities are missing option {exc.args[0]!r}"
+            ) from exc
+        except (TypeError, ValueError) as exc:
+            raise RequestError(
+                "Gold probabilities must contain numeric values"
+            ) from exc
+
+        label = answer["label"]
+
+        if question["type"] == "noul":
+            label = label.lower()
+        if label not in option_keys:
+            raise RequestError(f"Gold label {label!r} is not one of {option_keys!r}")
+
+        label_index = option_keys.index(label)
+        return option_keys, probabilities, label_index
+
     def decision_messages(self, row: DecisionInput):
         questions = row["questions"]
         state = row["state"]
@@ -159,11 +197,26 @@ class Encoder:
             enable_thinking=False,
         )
 
-    def encode(self, row: DecisionInput) -> Encoded:
+    def encode(self, row: DecisionInput, gold: dict[str, Answer]) -> Encoded:
         inputs = self.processor(text=[self.text(row)], images=None, return_tensors="pt")
         ids = inputs["input_ids"][0]
         markers = (ids == self.marker_id).nonzero().flatten()
         keys = tuple(row["questions"])
+
+        option_keys = []
+        targets = []
+        labels = []
+
+        for question_key, question in row["questions"].items():
+            question_option_keys, target, label = self.target_and_label(
+                question,
+                gold[question_key],
+            )
+
+            option_keys.append(question_option_keys)
+            targets.append(target)
+            labels.append(label)
+
         if len(markers) != len(keys):
             raise ValueError(
                 "Readout markers do not match questions after tokenization"
@@ -172,8 +225,11 @@ class Encoder:
         return Encoded(
             keys=keys,
             counts=tuple(len(options(q)[0]) for q in row["questions"].values()),
+            option_keys=tuple(option_keys),
             input_ids=ids,
             markers=markers,
+            targets=tuple(targets),
+            labels=tuple(labels),
             mm_token_type_ids=None if mm is None else mm[0],
             pixel_values=inputs.get("pixel_values"),
             image_grid_thw=inputs.get("image_grid_thw"),
@@ -186,8 +242,13 @@ class Encoder:
     ) -> list[Encoded]:
         self.validate(row)
 
+        gold = row["gold"]
+
         def split(items: list[tuple[str, Question]]) -> list[Encoded]:
-            encoded = self.encode({**row, "questions": dict(items)})
+            chunk_answer = {
+                question_key: gold[question_key] for question_key, _ in items
+            }
+            encoded = self.encode({**row, "questions": dict(items)}, gold=chunk_answer)
             if max_length is None or encoded.length <= max_length:
                 return [encoded]
             if len(items) == 1:

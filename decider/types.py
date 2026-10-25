@@ -1,4 +1,4 @@
-from typing import List, Literal, NotRequired, TypedDict
+from typing import List, Literal, NotRequired, TypedDict, Union
 
 type JSONValue = str | int | float | bool | None | list[JSONValue] | dict[
     str, JSONValue
@@ -31,9 +31,38 @@ type Question = ChoiceQuestion | NoulQuestion | ScoreQuestion
 type Questions = dict[str, Question]
 
 
+class ChoiceAnswer(TypedDict):
+    type: Literal["choice"]
+    confidence: float
+    # choice: str
+    label: str
+    probabilities: dict[str, float]
+
+
+class NoulAnswer(TypedDict):
+    type: Literal["noul"]
+    confidence: float
+    label: str
+    noul: float
+    probabilities: dict[str, float]
+
+
+class ScoreAnswer(TypedDict):
+    type: Literal["score"]
+    confidence: float
+    # legend: dict[str, Content | None]
+    label: str
+    probabilities: dict[str, float]
+    score: float
+
+
+Answer = Union[ChoiceAnswer, NoulAnswer, ScoreAnswer]
+
+
 class DecisionInput(TypedDict):
     state: Content
     questions: Questions
+    gold: dict[str, Answer]
 
 
 class Example(DecisionInput):
