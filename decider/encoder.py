@@ -237,14 +237,15 @@ class Encoder:
 
     def prepare_batch(
         self,
-        row: DecisionInput,
+        rows: Sequence[DecisionInput],
         max_length: int = 2048,
     ) -> list[Encoded]:
-        self.validate(row)
+        if not rows:
+            raise RequestError("At least one row is required")
 
-        gold = row["gold"]
-
-        def split(items: list[tuple[str, Question]]) -> list[Encoded]:
+        def split(
+            items: list[tuple[str, Question]], gold: dict[str, Answer]
+        ) -> list[Encoded]:
             chunk_answer = {
                 question_key: gold[question_key] for question_key, _ in items
             }
@@ -257,9 +258,16 @@ class Encoder:
                     f"{max_length}-token limit; shorten the state, lower the image resolution or raise max_length"
                 )
             middle = len(items) // 2
-            return split(items[:middle]) + split(items[middle:])
+            return split(items[:middle], gold) + split(items[middle:], gold)
 
-        return split(list(row["questions"].items()))
+        batch: list[Encoded] = []
+
+        for row in rows:
+            self.validate(row)
+            gold = row["gold"]
+            batch.extend(split(list(row["questions"].items()), gold=gold))
+
+        return batch
 
 
 def left_pad(chunks: Sequence[Encoded], pad_id: int) -> dict[str, torch.Tensor]:
