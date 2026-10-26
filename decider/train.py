@@ -1,4 +1,3 @@
-from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 import logging
@@ -8,40 +7,22 @@ from typing import Any, Literal, cast
 import tyro
 import torch
 from datasets import load_dataset
-from torch.utils.data import Dataset
 from transformers import Trainer, TrainingArguments
 from peft import LoraConfig, get_peft_model
 
 import wandb
 
 from decider.config import Args
-from decider.dataset import encode_dataset
+from decider.dataset import (
+    EncodedBatchDataset,
+    collate_encoded_batches,
+    encode_dataset,
+)
 from decider.encoder import Encoded
 from decider.loss import decision_loss
 from decider.model import DecisionModel
 
 LOG = logging.getLogger("DECIDER")
-
-
-class EncodedBatchDataset(Dataset):
-    def __init__(self, batches: list[list[Encoded]]) -> None:
-        self.batches = batches
-
-    def __len__(self) -> int:
-        return len(self.batches)
-
-    def __getitem__(self, index: int) -> list[Encoded]:
-        return self.batches[index]
-
-
-def collate_encoded_batches(features: list[list[Encoded]]) -> dict[str, Any]:
-    if not features:
-        raise ValueError("Encoded batch features are empty")
-
-    chunks = [chunk for batch in features for chunk in batch]
-    if not chunks:
-        raise ValueError("Encoded batch contains no chunks")
-    return {"chunks": chunks}
 
 
 class DeciderTrainer(Trainer):
