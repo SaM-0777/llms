@@ -3,20 +3,18 @@ from datetime import datetime
 from pathlib import Path
 import logging
 import random
-from typing import Literal
+from typing import Any, Literal, cast
 
 import tyro
 import torch
 from datasets import load_dataset
-from transformers import get_scheduler
-from transformers.trainer_callback import TrainerState
-from transformers.trainer_utils import rotate_checkpoints
-from accelerate import Accelerator
+from torch.utils.data import Dataset
+from transformers import Trainer, TrainingArguments
 from peft import LoraConfig, get_peft_model
 
 import wandb
-from tqdm import tqdm
 
+from decider.config import Args
 from decider.dataset import encode_dataset
 from decider.encoder import Encoded
 from decider.loss import decision_loss
@@ -25,66 +23,178 @@ from decider.model import DecisionModel
 LOG = logging.getLogger("DECIDER")
 
 
-@dataclass
-class Args:
-    seed: int = 42
-    device: Literal["cuda", "mps", "cpu"] = "cuda"
-    model_id: str = "Qwen/Qwen3.5-0.8B"
-    revision: str = "2b48083dfa97c3cbf0220cf1a5e6cffe0a511157"
-    batch_size: int = 16
-    dataset_id: str = "LocalLLaMA/typed-decisions"
-    dataset_name: str | None = "all"
-    dataset_streaming: bool = False
-    train_split: str = "train"
-    eval_split: str = "test"
+class EncodedBatchDataset(Dataset):
+    def __init__(self, batches: list[list[Encoded]]) -> None:
+        self.batches = batches
 
-    max_seq_length: int = 2048
-    lora_r: int = 16
-    lora_alpha: int = 16
-    lora_dropout: float = 0.0
-    lora_target_modules: str = "all-linear"
-    lora_bias: bool = False
-    bias: Literal["none", "all", "lora_only"] = "none"
+    def __len__(self) -> int:
+        return len(self.batches)
 
-    output_dir: str | Path = "output"
-    resume_from_checkpoint: str | None = None
-    num_train_epochs: float = 1.0
-    per_device_train_batch_size: int = 16
-    per_device_eval_batch_size: int = 4
-    max_grad_norm: float | None = 1.0
-    learning_rate: float = 2e-4
-    weight_decay: float = 0.01
-    warmup_steps: int = 10
-    lr_scheduler_type: str = "cosine"
-    brier_weight: float = 0.0
-    logging_steps: int = 2
-    eval_steps: int = 20
-    save_steps: int = 100
-    save_total_limit: int = 5
-    load_best_model_at_end: bool = True
-    gradient_checkpointing: bool = False
-    torch_compile: bool = False
-    torch_compile_backend: str = "inductor"
-    torch_compile_mode: Literal[
-        "default",
-        "reduce-overhead",
-        "max-autotune",
-        "max-autotune-no-cudagraphs",
-    ] = "default"
-    torch_compile_fullgraph: bool = False
-    torch_compile_dynamic: bool | None = None
-    report_to: str = "none"
-    project_name: str = "Decider"
-    run_name: str | None = None
-    wandb_entity: str | None = None
-    wandb_tags: list[str] = field(
-        default_factory=lambda: [
-            "decider",
-            "qwen3.5-0.8B",
-            "lora",
-            "decision-model",
-        ]
-    )
+    def __getitem__(self, index: int) -> list[Encoded]:
+        return self.batches[index]
+
+
+def collate_encoded_batches(features: list[list[Encoded]]) -> dict[str, Any]:
+    if not features:
+        raise ValueError("Encoded batch features are empty")
+
+    chunks = [chunk for batch in features for chunk in batch]
+    if not chunks:
+        raise ValueError("Encoded batch contains no chunks")
+    return {"chunks": chunks}
+
+
+class DeciderTrainer(Trainer):
+    def __init__(
+        self,
+        *args: Any,
+        brier_weight: float = 0.0,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(*args, **kwargs)
+        self._train_question_count = 0
+        self._train_cross_entropy = 0.0
+        self._train_brier = 0.0
+        self._eval_totals: list[float] | None = None
+        self._brier_weight = brier_weight
+
+    @staticmethod
+    def _question_count(chunks: list[Encoded]) -> int:
+        question_count = sum(len(chunk.labels) for chunk in chunks)
+        if question_count == 0:
+            raise ValueError("Encoded batch produced no questions")
+        return question_count
+
+    @staticmethod
+    def _accuracy(outputs: list[list[torch.Tensor]], chunks: list[Encoded]) -> int:
+        correct = 0
+        for chunk_outputs, chunk in zip(outputs, chunks, strict=True):
+            for logits, label in zip(chunk_outputs, chunk.labels, strict=True):
+                correct += int(int(logits.argmax(dim=-1).item()) == label)
+        return correct
+
+    def _compute_components(
+        self,
+        model: torch.nn.Module,
+        chunks: list[Encoded],
+    ):
+        outputs = model(chunks)
+        components = decision_loss(
+            outputs=outputs,
+            chunks=chunks,
+            brier_weight=self._brier_weight,
+        )
+        if not torch.isfinite(components.total):
+            raise RuntimeError("Nonfinite loss")
+        return outputs, components
+
+    def compute_loss(
+        self,
+        model: torch.nn.Module,
+        inputs: dict[str, list[Encoded] | Any],
+        return_outputs: bool = False,
+        num_items_in_batch: torch.Tensor | int | None = None,
+    ):
+        chunks = inputs["chunks"]
+        outputs, components = self._compute_components(model, chunks)
+        question_count = self._question_count(chunks)
+
+        if model.training:
+            self._train_question_count += question_count
+            self._train_cross_entropy += (
+                float(components.cross_entropy.detach()) * question_count
+            )
+            self._train_brier += float(components.brier.detach()) * question_count
+
+        if return_outputs:
+            return components.total, outputs
+        return components.total
+
+    def log(
+        self,
+        logs: dict[str, float],
+        start_time: float | None = None,
+    ) -> None:
+        logs = dict(logs)
+        if "loss" in logs and self._train_question_count:
+            logs["train/loss"] = logs["loss"]
+            logs["train/cross_entropy"] = (
+                self._train_cross_entropy / self._train_question_count
+            )
+            logs["train/brier"] = self._train_brier / self._train_question_count
+            if "learning_rate" in logs:
+                logs["train/learning_rate"] = logs["learning_rate"]
+            self._train_question_count = 0
+            self._train_cross_entropy = 0.0
+            self._train_brier = 0.0
+        super().log(logs, start_time=start_time)
+
+    def prediction_step(
+        self,
+        model: torch.nn.Module,
+        inputs: dict[str, list[Encoded] | Any],
+        prediction_loss_only: bool,
+        ignore_keys: list[str] | None = None,
+    ) -> tuple[torch.Tensor, None, None]:
+        inputs = self._prepare_inputs(inputs)
+        chunks = inputs["chunks"]
+        with torch.no_grad():
+            outputs, components = self._compute_components(model, chunks)
+
+        question_count = self._question_count(chunks)
+        correct = self._accuracy(outputs, chunks)
+        totals = torch.tensor(
+            [
+                float(components.total.detach()) * question_count,
+                float(components.cross_entropy.detach()) * question_count,
+                float(components.brier.detach()) * question_count,
+                float(correct),
+                float(question_count),
+            ],
+            device=components.total.device,
+            dtype=torch.float32,
+        ).unsqueeze(0)
+        gathered_totals = cast(
+            torch.Tensor,
+            self.accelerator.gather_for_metrics(totals),
+        )
+        totals = gathered_totals.sum(dim=0)
+        if self._eval_totals is None:
+            self._eval_totals = [0.0] * 5
+        for index, value in enumerate(totals.tolist()):
+            self._eval_totals[index] += value
+
+        return components.total.detach(), None, None
+
+    def evaluation_loop(self, *args: Any, **kwargs: Any):
+        self._eval_totals = None
+        metric_key_prefix = kwargs.get("metric_key_prefix", "eval")
+        output = super().evaluation_loop(*args, **kwargs)
+        if self._eval_totals is None or self._eval_totals[4] == 0:
+            raise ValueError("Evaluation produced no questions")
+
+        eval_totals = cast(
+            list[float] | None,
+            self._eval_totals,
+        )
+        if eval_totals is None:
+            raise ValueError("Evaluation produced no question totals")
+        if eval_totals[4] == 0:
+            raise ValueError("Evaluation produced no questions")
+
+        total_loss, cross_entropy, brier, correct, questions = eval_totals
+
+        metrics = dict(output.metrics or {})
+        metrics.update(
+            {
+                f"{metric_key_prefix}_loss": total_loss / questions,
+                f"{metric_key_prefix}_cross_entropy": cross_entropy / questions,
+                f"{metric_key_prefix}_brier": brier / questions,
+                f"{metric_key_prefix}_accuracy": correct / questions,
+                f"{metric_key_prefix}_questions": questions,
+            }
+        )
+        return output._replace(metrics=metrics)
 
 
 def configure_wandb(args: Args) -> str | None:
@@ -104,6 +214,7 @@ def configure_wandb(args: Args) -> str | None:
         "dataset_id": args.dataset_id,
         "train_split": args.train_split,
         "test_split": args.eval_split,
+        "full_finetuning": args.full_finetuning,
         "lora_r": args.lora_r,
         "lora_alpha": args.lora_alpha,
         "lora_dropout": args.lora_dropout,
@@ -123,8 +234,6 @@ def configure_wandb(args: Args) -> str | None:
         "torch_compile": args.torch_compile,
         "torch_compile_backend": args.torch_compile_backend,
         "torch_compile_mode": args.torch_compile_mode,
-        "torch_compile_fullgraph": args.torch_compile_fullgraph,
-        "torch_compile_dynamic": args.torch_compile_dynamic,
     }
 
     run = wandb.init(
@@ -182,193 +291,69 @@ def get_model(args: Args):
 
     model = DecisionModel(
         model_id=args.model_id,
-        revision=args.revision,
+        dtype=torch.bfloat16,
         device=torch.device(args.device),
         train=True,
         gradient_checkpointing=args.gradient_checkpointing,
     )
-    model.backbone.requires_grad_(False)
-
-    lora_config = get_lora_config(
-        lora_r=args.lora_r,
-        lora_alpha=args.lora_alpha,
-        dropout=args.lora_dropout,
-        lora_bias=args.lora_bias,
-        bias=args.bias,
-        lora_target_modules=args.lora_target_modules,
-    )
-    model.backbone = get_peft_model(  # pyright: ignore[reportAttributeAccessIssue]
-        model.backbone, lora_config
-    )
+    if args.full_finetuning:
+        model.backbone.requires_grad_(True)
+    else:
+        model.backbone.requires_grad_(False)
+        lora_config = get_lora_config(
+            lora_r=args.lora_r,
+            lora_alpha=args.lora_alpha,
+            dropout=args.lora_dropout,
+            lora_bias=args.lora_bias,
+            bias=args.bias,
+            lora_target_modules=args.lora_target_modules,
+        )
+        model.backbone = get_peft_model(  # pyright: ignore[reportAttributeAccessIssue]
+            model.backbone, lora_config
+        )
     model.to(args.device)
 
-    lora_parameters = []
-    frozen_backbone_parameters = []
-
-    for name, parameter in model.backbone.named_parameters():
-        if "lora_" in name:
-            if not parameter.requires_grad:
-                raise RuntimeError(f"LoRA parameter is frozen: {name}")
-            lora_parameters.append(parameter)
-        else:
-            if parameter.requires_grad:
+    if args.full_finetuning:
+        if not all(
+            parameter.requires_grad for parameter in model.backbone.parameters()
+        ):
+            raise RuntimeError(
+                "All backbone parameters must be trainable for full fine-tuning"
+            )
+    else:
+        lora_parameters = []
+        for name, parameter in model.backbone.named_parameters():
+            if "lora_" in name:
+                if not parameter.requires_grad:
+                    raise RuntimeError(f"LoRA parameter is frozen: {name}")
+                lora_parameters.append(parameter)
+            elif parameter.requires_grad:
                 raise RuntimeError(f"Original backbone parameter is trainable: {name}")
-            frozen_backbone_parameters.append(parameter)
 
-    if not lora_parameters:
-        raise RuntimeError("No LoRA parameters were created")
+        if not lora_parameters:
+            raise RuntimeError("No LoRA parameters were created")
+
     if any("lora_" in name for name, _ in model.readout.named_parameters()):
         raise RuntimeError("LoRA was added to the readout")
     if not all(parameter.requires_grad for parameter in model.readout.parameters()):
         raise RuntimeError("Readout parameters must be trainable")
 
     model.readout.requires_grad_(True)
-    if args.torch_compile:
-        LOG.info(
-            "Compiling model with torch.compile: backend=%s mode=%s fullgraph=%s dynamic=%s",
-            args.torch_compile_backend,
-            args.torch_compile_mode,
-            args.torch_compile_fullgraph,
-            args.torch_compile_dynamic,
-        )
-        model = torch.compile(
-            model,
-            backend=args.torch_compile_backend,
-            mode=args.torch_compile_mode,
-            fullgraph=args.torch_compile_fullgraph,
-            dynamic=args.torch_compile_dynamic,
-        )
-
-    trainable_parameters = [
-        parameter for parameter in model.parameters() if parameter.requires_grad
-    ]
-    optimizer = torch.optim.AdamW(
-        trainable_parameters,
-        lr=args.learning_rate,
-        weight_decay=args.weight_decay,
-    )
-
-    return model, optimizer
-
-
-def save_checkpoint(
-    accelerator: Accelerator,
-    args: Args,
-    trainer_state: TrainerState,
-    *,
-    global_step: int,
-    final: bool = False,
-) -> Path:
-    output_dir = Path(args.output_dir).expanduser().resolve()
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    checkpoint_dir = (
-        output_dir / "final_checkpoint"
-        if final
-        else output_dir / f"checkpoint-{global_step}"
-    )
-
-    accelerator.wait_for_everyone()
-    accelerator.save_state(
-        output_dir=str(checkpoint_dir),
-        safe_serialization=True,
-    )
-    accelerator.wait_for_everyone()
-
-    if accelerator.is_main_process:
-        trainer_state.save_to_json(str(checkpoint_dir / "trainer_state.json"))
-        if not final:
-            rotate_checkpoints(
-                output_dir=str(output_dir),
-                save_total_limit=args.save_total_limit,
-                checkpoint_prefix="checkpoint",
-            )
-
-    accelerator.wait_for_everyone()
-    return checkpoint_dir
-
-
-def evaluate(
-    model: DecisionModel,
-    eval_batches: list[list[Encoded]],
-    args: Args,
-) -> dict[str, float]:
-    if not eval_batches:
-        raise ValueError("Evaluation batches are empty")
-
-    model.eval()
-    total_loss = 0.0
-    total_cross_entropy = 0.0
-    total_brier = 0.0
-    total_questions = 0
-    correct_questions = 0
-
-    eval_progress = tqdm(
-        eval_batches,
-        desc="Evaluate",
-        unit="batch",
-        leave=False,
-        dynamic_ncols=True,
-    )
-
-    with torch.inference_mode():
-        for encoded_batch in eval_progress:
-            outputs = model(encoded_batch)
-            components = decision_loss(
-                outputs=outputs,
-                chunks=encoded_batch,
-                brier_weight=args.brier_weight,
-            )
-
-            if not torch.isfinite(components.total):
-                raise RuntimeError("Nonfinite evaluation loss")
-
-            batch_questions = sum(len(chunk.labels) for chunk in encoded_batch)
-            if batch_questions == 0:
-                raise ValueError("Evaluation batch produced no questions")
-
-            total_loss += float(components.total) * batch_questions
-            total_cross_entropy += float(components.cross_entropy) * batch_questions
-            total_brier += float(components.brier) * batch_questions
-
-            for chunk_outputs, chunk in zip(outputs, encoded_batch, strict=True):
-                for logits, label in zip(chunk_outputs, chunk.labels, strict=True):
-                    prediction = int(logits.argmax(dim=-1).item())
-                    correct_questions += int(prediction == label)
-                    total_questions += 1
-
-            eval_progress.set_postfix(
-                loss=total_loss / total_questions,
-                acc=correct_questions / total_questions,
-            )
-
-    if total_questions == 0:
-        raise ValueError("Evaluation produced no questions")
-
-    model.train()
-    return {
-        "eval/loss": total_loss / total_questions,
-        "eval/cross_entropy": total_cross_entropy / total_questions,
-        "eval/brier": total_brier / total_questions,
-        "eval/accuracy": correct_questions / total_questions,
-        "eval/questions": float(total_questions),
-    }
+    return model
 
 
 def train(
     model: DecisionModel,
-    optimizer: torch.optim.Optimizer,
     train_batches: list[list[Encoded]],
     eval_batches: list[list[Encoded]],
-    accelerator: Accelerator,
     args: Args,
 ) -> None:
     if not train_batches:
         raise ValueError("Training batches are empty")
+    if not eval_batches:
+        raise ValueError("Evaluation batches are empty")
     if args.num_train_epochs < 1:
         raise ValueError("num_train_epochs must be at least one")
-    if int(args.num_train_epochs) != args.num_train_epochs:
-        raise ValueError("num_train_epochs must be an integer for this loop")
     if args.logging_steps < 1:
         raise ValueError("logging_steps must be at least one")
     if args.eval_steps < 1:
@@ -377,189 +362,61 @@ def train(
         raise ValueError("save_steps must be at least one")
     if args.save_total_limit < 1:
         raise ValueError("save_total_limit must be at least one")
-    if not eval_batches:
-        raise ValueError("Evaluation batches are empty")
-
-    epochs = int(args.num_train_epochs)
-    total_training_steps = len(train_batches) * epochs
-
     if args.warmup_steps < 0:
         raise ValueError("warmup_steps must be nonnegative")
-    if args.warmup_steps > total_training_steps:
-        raise ValueError("warmup_steps cannot exceed total training steps")
 
-    scheduler = get_scheduler(
-        name=args.lr_scheduler_type,
-        optimizer=optimizer,
-        num_warmup_steps=args.warmup_steps,
-        num_training_steps=total_training_steps,
-    )
+    output_dir = Path(args.output_dir).expanduser().resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    model, optimizer, scheduler = accelerator.prepare(model, optimizer, scheduler)
-
-    model.train()
-    optimizer.zero_grad(set_to_none=True)
-    global_step = 0
-    trainer_state = TrainerState(
-        epoch=0.0,
-        global_step=0,
-        max_steps=total_training_steps,
+    training_args = TrainingArguments(
+        output_dir=str(output_dir),
+        seed=args.seed,
+        use_cpu=args.device == "cpu",
+        per_device_train_batch_size=args.per_device_train_batch_size,
+        per_device_eval_batch_size=args.per_device_eval_batch_size,
+        num_train_epochs=args.num_train_epochs,
+        learning_rate=args.learning_rate,
+        weight_decay=args.weight_decay,
+        warmup_steps=args.warmup_steps,
+        lr_scheduler_type=args.lr_scheduler_type,
+        optim="adamw_torch",
+        max_grad_norm=args.max_grad_norm or 1.0,
+        bf16=True,
+        bf16_full_eval=True,
+        torch_compile=args.torch_compile,
+        torch_compile_backend=(
+            args.torch_compile_backend if args.torch_compile else None
+        ),
+        torch_compile_mode=args.torch_compile_mode if args.torch_compile else None,
         logging_steps=args.logging_steps,
+        eval_strategy="steps",
         eval_steps=args.eval_steps,
+        save_strategy="steps",
         save_steps=args.save_steps,
-        train_batch_size=args.per_device_train_batch_size,
-        num_train_epochs=epochs,
+        save_total_limit=args.save_total_limit,
+        load_best_model_at_end=args.load_best_model_at_end,
+        metric_for_best_model="eval_loss",
+        greater_is_better=False,
+        report_to=args.report_to,
+        run_name=args.run_name,
+        remove_unused_columns=False,
+        dataloader_pin_memory=False,
     )
 
-    if args.resume_from_checkpoint is not None:
-        checkpoint_dir = Path(args.resume_from_checkpoint).expanduser().resolve()
-        trainer_state_path = checkpoint_dir / "trainer_state.json"
-        if not trainer_state_path.is_file():
-            raise FileNotFoundError(f"Trainer state is missing: {trainer_state_path}")
-
-        accelerator.load_state(input_dir=str(checkpoint_dir))
-        trainer_state = TrainerState.load_from_json(str(trainer_state_path))
-        global_step = trainer_state.global_step
-        if global_step > total_training_steps:
-            raise ValueError(
-                "Checkpoint global_step is beyond the configured training run: "
-                f"{global_step} > {total_training_steps}"
-            )
-
-    start_epoch = global_step // len(train_batches)
-    resume_batch = global_step % len(train_batches)
-
-    def log_evaluation(step: int, progress: tqdm | None = None) -> None:
-        eval_metrics = evaluate(
-            model=model,
-            eval_batches=eval_batches,
-            args=args,
-        )
-
-        print(eval_metrics)
-        if args.report_to == "wandb":
-            wandb.log(eval_metrics, step=step)
-
-        if progress is not None:
-            progress.set_postfix(
-                eval_loss=eval_metrics["eval/loss"],
-                eval_acc=eval_metrics["eval/accuracy"],
-            )
-
-    for epoch in range(start_epoch, epochs):
-        loss = 0.0
-        cross_entropy = 0.0
-        brier = 0.0
-        batches = 0
-
-        epoch_batches = list(train_batches)
-        random.Random(args.seed + epoch).shuffle(epoch_batches)
-        batch_start = resume_batch if epoch == start_epoch else 0
-
-        progress = tqdm(
-            epoch_batches[batch_start:],
-            total=len(epoch_batches),
-            initial=batch_start,
-            desc=f"Train epoch {epoch + 1}/{epochs}",
-            unit="batch",
-            dynamic_ncols=True,
-        )
-
-        for batch_index, encoded_batch in enumerate(
-            progress,
-            start=batch_start,
-        ):
-            outputs = model(encoded_batch)
-            components = decision_loss(
-                outputs=outputs,
-                chunks=encoded_batch,
-                brier_weight=args.brier_weight,
-            )
-
-            if not torch.isfinite(components.total):
-                raise RuntimeError("Nonfinite training loss")
-
-            accelerator.backward(components.total)
-
-            loss += float(components.total.detach())
-            cross_entropy += float(components.cross_entropy.detach())
-            brier += float(components.brier.detach())
-            batches += 1
-
-            if not torch.isfinite(components.total.detach()):
-                raise RuntimeError(f"Nonfinite loss at step {global_step + 1}")
-
-            gradient_norm: torch.Tensor | None = None
-            if args.max_grad_norm:
-                gradient_norm = accelerator.clip_grad_norm_(
-                    model.parameters(),
-                    max_norm=args.max_grad_norm,
-                )
-                if gradient_norm is None:
-                    raise RuntimeError("Gradient norm is None")
-                if not torch.isfinite(gradient_norm):
-                    raise RuntimeError("Nonfinite gradient norm")
-
-            optimizer.step()
-            scheduler.step()
-            optimizer.zero_grad(set_to_none=True)
-            global_step += 1
-            trainer_state.global_step = global_step
-            trainer_state.epoch = epoch + (batch_index + 1) / len(epoch_batches)
-
-            if global_step % args.logging_steps == 0:
-                metrics = {
-                    "train/loss": loss / batches,
-                    "train/cross_entropy": cross_entropy / batches,
-                    "train/brier": brier / batches,
-                    "train/learning_rate": scheduler.get_last_lr()[0],
-                    "train/epoch": epoch + 1,
-                    "train/step": global_step,
-                }
-
-                if gradient_norm:
-                    metrics["train/gradient_norm"] = float(gradient_norm)
-
-                print(metrics)
-
-                if args.report_to == "wandb":
-                    wandb.log(metrics, step=global_step)
-
-                progress.set_postfix(
-                    loss=metrics["train/loss"],
-                    lr=metrics["train/learning_rate"],
-                )
-
-                loss = 0.0
-                cross_entropy = 0.0
-                brier = 0.0
-                batches = 0
-
-            if global_step % args.eval_steps == 0:
-                log_evaluation(global_step, progress)
-
-            if global_step % args.save_steps == 0:
-                checkpoint_dir = save_checkpoint(
-                    accelerator=accelerator,
-                    args=args,
-                    trainer_state=trainer_state,
-                    global_step=global_step,
-                )
-                LOG.info("Saved checkpoint: %s", checkpoint_dir)
-
-    if global_step % args.eval_steps != 0 or start_epoch == epochs:
-        log_evaluation(global_step)
-
-    trainer_state.global_step = global_step
-    trainer_state.epoch = float(epochs)
-    final_checkpoint = save_checkpoint(
-        accelerator=accelerator,
-        args=args,
-        trainer_state=trainer_state,
-        global_step=global_step,
-        final=True,
+    trainer = DeciderTrainer(
+        model=model,
+        args=training_args,
+        train_dataset=EncodedBatchDataset(train_batches),
+        eval_dataset=EncodedBatchDataset(eval_batches),
+        data_collator=collate_encoded_batches,
+        processing_class=model.tokenizer,
+        brier_weight=args.brier_weight,
     )
-    LOG.info("Saved final checkpoint: %s", final_checkpoint)
+    trainer.train(resume_from_checkpoint=args.resume_from_checkpoint)
+
+    final_checkpoint = output_dir / "final_checkpoint"
+    trainer.save_model(str(final_checkpoint))
+    LOG.info("Saved final model: %s", final_checkpoint)
 
 
 def main(args: Args):
@@ -576,10 +433,9 @@ def main(args: Args):
 
     output_dir = Path(args.output_dir).expanduser().resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
-    accelerator = Accelerator()
 
     # Model
-    model, optimizer = get_model(args)
+    model = get_model(args)
     encoder = model.encoder
 
     # Dataset
@@ -589,16 +445,24 @@ def main(args: Args):
     train_dataset = load_dataset(dataset_id, dataset_name, split=args.train_split)
     eval_dataset = load_dataset(dataset_id, dataset_name, split=args.eval_split)
 
-    train_rows = encode_dataset(train_dataset, encoder=encoder)
-    eval_rows = encode_dataset(eval_dataset, encoder=encoder)
+    train_rows = encode_dataset(
+        train_dataset,
+        encoder=encoder,
+        batch_size=args.batch_size,
+        max_length=args.max_seq_length,
+    )
+    eval_rows = encode_dataset(
+        eval_dataset,
+        encoder=encoder,
+        batch_size=args.batch_size,
+        max_length=args.max_seq_length,
+    )
 
     configure_wandb(args)
     train(
         model=model,
-        optimizer=optimizer,
         train_batches=train_rows,
         eval_batches=eval_rows,
-        accelerator=accelerator,
         args=args,
     )
 

@@ -22,7 +22,6 @@ from transformers.masking_utils import create_recurrent_attention_mask
 from decider.encoder import MAX_OPTIONS, Encoded, Encoder, left_pad
 
 MODEL_ID = "Qwen/Qwen3.5-0.8B"
-REVISION = "2b48083dfa97c3cbf0220cf1a5e6cffe0a511157"
 
 
 @dataclass(frozen=True)
@@ -36,7 +35,6 @@ class DecisionModel(nn.Module):
     def __init__(
         self,
         model_id: str = MODEL_ID,
-        revision: str = REVISION,
         attention_mode: str = "noncausal_full_attention",
         checkpoint: str | Path | None = None,
         dtype: torch.dtype | None = torch.bfloat16,
@@ -51,12 +49,8 @@ class DecisionModel(nn.Module):
         super().__init__()
         self.device = device
         self.model_id = model_id
-        self.revision = revision
         self.max_length = max_length
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            self.model_id,
-            revision=self.revision,
-        )
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_id)
         self.decision_candidates = list(string.ascii_uppercase) + [
             "".join(pair)
             for pair in itertools.product(string.ascii_uppercase, repeat=2)
@@ -81,7 +75,6 @@ class DecisionModel(nn.Module):
             Qwen3VLProcessor,
             AutoProcessor.from_pretrained(
                 str(checkpoint) if checkpoint else self.model_id,
-                revision=None if checkpoint else self.revision,
             ),
         )
 
@@ -95,7 +88,6 @@ class DecisionModel(nn.Module):
         if checkpoint is None:
             model = Qwen3_5ForConditionalGeneration.from_pretrained(
                 self.model_id,
-                revision=revision,
                 dtype=dtype,
                 attn_implementation="sdpa",
                 cache_dir=None,
